@@ -115,4 +115,39 @@ public class Tutee extends Person implements Serializable{
         return false;
     }
 
+    public boolean searchSubjectByNameAndLevel (String subjectName, char subjectLevel) throws IOException {
+        int low = 0;
+        int high = this.subjectsLearning.size() - 1;
+        while (low <= high) {
+            int mid = low + (high - low) / 2;
+            if (this.subjectsLearning.get(mid).getSubjectName().equals(subjectName) && this.subjectsLearning.get(mid).getSubjectLevel() == (subjectLevel)) {
+                return true;
+            }
+            else if (this.subjectsLearning.get(mid).getSubjectName().compareTo(subjectName)<0) {
+                low = mid + 1;
+            }
+            else {
+                high = mid - 1;
+            }
+        }
+        return false;
+    }
+
+    public Subject searchSubjectByNameAndLevelAndReturnSubject(String subjectName, char subjectLevel) {
+        int low = 0;
+        int high = this.subjectsLearning.size() - 1;
+        while (low <= high) {
+            int mid = low + (high - low) / 2;
+            if (this.subjectsLearning.get(mid).getSubjectName().equals(subjectName) && this.subjectsLearning.get(mid).getSubjectLevel() == (subjectLevel)) {
+                return subjectsLearning.get(mid);
+            }
+            else if (this.subjectsLearning.get(mid).getSubjectName().compareTo(subjectName)<0) {
+                low = mid + 1;
+            }
+            else {
+                high = mid - 1;
+            }
+        }
+        return null;
+    }
 }

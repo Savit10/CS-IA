@@ -39,25 +39,13 @@ public class Tutor extends Person implements Serializable {
     {
         String sessionsavailable = "";
         if (sessionsAvailable != null) {
-            for (HashMap.Entry <String, Boolean> entry: sessionsAvailable.entrySet()) // adapted from https://www.geeksforgeeks.org/iterate-map-java/
+            for (String string: sessionsAvailable.keySet()) // adapted from https://www.geeksforgeeks.org/iterate-map-java/
             {
-                if (entry.getValue())
-                {
-                    sessionsavailable  = sessionsavailable + entry.getKey() + " ,";
-                }
+                sessionsavailable += string + " ,";
             }
         }
 
         return "Sessions available: " + sessionsavailable ;
-    }
-
-    public String toStringSubjectsTaught ()
-    {
-        String toString = "";
-        for (Subject subject : subjectsTaught) {
-            toString = toString + subject.toString() + ", ";
-        }
-        return toString;
     }
 
     public void setSessionsAvailable(HashMap <String, Boolean> sessionsAvailable) {
@@ -71,14 +59,12 @@ public class Tutor extends Person implements Serializable {
     public void setTutee(Tutee tutee) {
         this.tutee = tutee;
     }
-    @java.lang.Override
     public java.lang.String toString() {
         return "Tutor {" +
                 "Student Name = " + this.getName()+
                 ", gradeLevel =" + gradeLevel +
                 ", subjectsTaught =" + subjectsTaught +
                 ", sessionsAvailable =" + toStringSessionsAvailable()+
-                ", tutee =" + tutee +
                 " }";
     }
 

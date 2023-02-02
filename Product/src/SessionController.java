@@ -1,5 +1,6 @@
 import java.io.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Objects;
 import java.util.Scanner;
 
@@ -9,6 +10,7 @@ public class SessionController {
     public static void main(String[] args) throws Exception {
         System.out.println("-------------------------------");
         System.out.println("Session Management");
+        System.out.println("-------------------------------");
         load();
         Scanner sc = new Scanner(System.in);
         System.out.println("Press A to add Sessions");
@@ -72,12 +74,12 @@ public class SessionController {
         while (!inputCorrect)
         {
             try {
-                System.out.println("Enter the session's time in the format HH:MM");
+                System.out.print("Enter the session's time in the format HH:MM: ");
                 String time = sc.nextLine();
                 sessionTime = new NewTime(time);
                 inputCorrect = true;
             }
-            catch (Exception e) { throw new RuntimeException ("Invalid input"); }
+            catch (Exception e) { System.out.println("Invalid input"); }
         }
         return sessionTime;
     }
@@ -88,12 +90,14 @@ public class SessionController {
         while (!inputCorrect)
         {
             try {
-                System.out.println("Enter the session's date in the format DD/MM/YYYY");
+                System.out.print("Enter the session's date in the format DD/MM/YYYY: ");
                 String date = sc.next();
                 sessionDate = new NewDate(date);
                 inputCorrect = true;
             }
-            catch (Exception e){ throw new Exception("Invalid date format");}
+            catch (Exception e){
+                System.out.println("Invalid date format");
+            }
         }
         return sessionDate;
     }
@@ -102,10 +106,11 @@ public class SessionController {
         Scanner sc = new Scanner(System.in);
         ArrayList<Tutor> tutors = new ArrayList<>();
         ArrayList<Tutee> tutees = new ArrayList<>();
+        TutorController.load();
+        TuteeController.load();
         boolean exitLoop = true;
         do {
-            TutorController.load();
-            System.out.println("What is the name of a tutor in this session?");
+            System.out.print("What is the name of a tutor in this session? ");
             String name = sc.nextLine();
             if (TutorController.searchByName(name)==null){
                 System.out.println("Tutor not found");
@@ -113,18 +118,35 @@ public class SessionController {
             }
             else {
                 tutors.add(TutorController.searchByName(name));
-                Objects.requireNonNull(TutorController.searchByName(name)).getSessionsAvailable().put(sessionDate.toString() + " " + sessionTime.toString(), true);
+                String key = sessionDate.toString() + " " + sessionTime.toString();
+                if (TutorController.searchByName(name).getSessionsAvailable() == null) {
+                    HashMap<String, Boolean> sessionsAvailable = new HashMap<>();
+                    sessionsAvailable.put(key, true);
+                    Objects.requireNonNull(TutorController.searchByName(name)).setSessionsAvailable(sessionsAvailable);
+                }
+                else {
+                    TutorController.searchByName(name).getSessionsAvailable().put(key, true);
+                }
+                System.out.println("Tutor Added");
             }
         } while (exitLoop);
         do {
             System.out.println("What is the name of a tutee in this session?");
-            String name = sc.next();
+            String name = sc.nextLine();
             if (TuteeController.searchByName(name)==null) {
                 System.out.println("Tutee not found");
             }
             else {
                 tutees.add(TuteeController.searchByName(name));
-                exitLoop = true;
+                String key = sessionDate.toString() + " " + sessionTime.toString();
+                if (TuteeController.searchByName(name).getSessionsAvailable() == null) {
+                    HashMap<String, Boolean> sessionsAvailable = new HashMap<>();
+                    sessionsAvailable.put(key, true);
+                    Objects.requireNonNull(TuteeController.searchByName(name)).setSessionsAvailable(sessionsAvailable);
+                }
+                else {
+                    TuteeController.searchByName(name).getSessionsAvailable().put(key, true);
+                }
             }
         } while (exitLoop);
         Session session = new Session(sessionDate, sessionTime, tutors, tutees);
@@ -136,14 +158,16 @@ public class SessionController {
         System.out.println("-------------------------------");
         System.out.println("Deleting Session");
         load();
+        System.out.println(sessions);
         NewDate sessionDate = addSessionDateInput();
         NewTime sessionTime = addSessionTimeInput();
-        if (searchByTime(sessionTime) == null) {
+        if (searchByDateAndTime(sessionTime, sessionDate) == null) {
             System.out.println("Session not found. Cannot delete");
         }
         else {
-            sessions.remove(searchByTime(sessionTime));
+            sessions.remove(searchByDateAndTime(sessionTime, sessionDate));
         }
+        System.out.println(sessions);
         save();
         returnToMainOrManagement();
     }
@@ -171,13 +195,13 @@ public class SessionController {
         Scanner sc = new Scanner(System.in);
         NewDate sessionDate = addSessionDateInput();
         NewTime sessionTime = addSessionTimeInput();
-        if (searchByTime(sessionTime) == null) {
+        if (searchByDateAndTime(sessionTime, sessionDate) == null) {
             System.out.println("Session not found. Cannot delete");
         }
         else {
             boolean continues = true;
             System.out.println("Found session. What would you like to edit?" );
-            Session session = searchByTime(sessionTime);
+            Session session = searchByDateAndTime(sessionTime, sessionDate);
             do {
                 System.out.println("[1] to edit Date");
                 System.out.println("[2] to edit Time");
@@ -195,21 +219,14 @@ public class SessionController {
                         session.setSessionTime(newSessionTime);
                         break;
                     case 3:
-                        System.out.println("Name of tutee you would like to edit?");
-                        sc.next();
+                        System.out.print("Name of tutee you would like to edit?");
+                        sc.nextLine();
                         String name = sc.nextLine();
-                        if (searchByNameTutee(name, session) !=null) {
+                        if (searchByNameTutee(name, session)!=null) {
                             System.out.println("Tutee found. Would you like to remove the tutee from the session? Press Y");
                             char booleanInput = sc.next().charAt(0);
                             if (booleanInput == 'Y') {
                                 session.getTutees().remove(searchByNameTutee(name, session));
-                            }
-                        }
-                        else if (TuteeController.searchByName(name) != null){
-                            System.out.println("Tutee does exist outside the session. Would you like to add the tutee to the session? Press Y");
-                            char yesOrNo = sc.next().charAt(0);
-                            if(yesOrNo == 'Y') {
-                                session.getTutees().add(TuteeController.searchByName(name));
                             }
                         }
                         else {
@@ -217,25 +234,19 @@ public class SessionController {
                         }
                         break;
                     case 4:
-                        System.out.println("Name of tutor you would like to edit?");
-                        sc.next();
-                        name = sc.nextLine();
-                        if (searchByNameTutor(name, session) !=null) {
-                            System.out.println("Tutor found. Would you like to remove the tutor from the session? Press Y");
+                        System.out.print("Name of tutor you would like to edit?");
+                        sc.nextLine();
+                        String tutorName = sc.nextLine();
+                        System.out.println(tutorName);
+                        if (searchByNameTutor(tutorName, session) !=null) {
+                            System.out.println("Tutor found. Would you like to remove the tutor from the session? Press Y/N");
                             char booleanInput = sc.next().charAt(0);
                             if (booleanInput == 'Y') {
-                                session.getTutors().remove(searchByNameTutor(name, session));
-                            }
-                        }
-                        else if (TutorController.searchByName(name) != null){
-                            System.out.println("Tutor does exist outside the session. Would you like to add the tutor to the session? Press Y");
-                            char yesOrNo = sc.next().charAt(0);
-                            if(yesOrNo == 'Y') {
-                                session.getTutors().add(TutorController.searchByName(name));
+                                session.getTutors().remove(searchByNameTutor(tutorName, session));
                             }
                         }
                         else {
-                            System.out.println("Tutee does not exist, cannot be deleted");
+                            System.out.println("Tutee does not exist in session, cannot be deleted");
                         }
                         break;
                     case 5:
@@ -301,34 +312,24 @@ public class SessionController {
     }
 
     public static Tutor searchByNameTutor(String name, Session session) {
-        TutorController.insertionSortByName(session.getTutors());
-        int low = 0;
-        int high = session.getTutors().size() - 1;
-        while (low <= high) {
-            int mid = low + (high - low) / 2;
-            if (session.getTutors().get(mid).getName().equals(name)) {
-                return session.getTutors().get(mid);
-            }
-            else if (session.getTutors().get(mid).getName().compareTo(name)<0) {
-                low = mid + 1;
-            }
-            else {
-                high = mid - 1;
+        for (Tutor tutor: session.getTutors()) {
+            if (tutor.getName().equals(name)) {
+                return tutor;
             }
         }
         return null;
     }
 
-    public static Session searchByTime (NewTime time) {
+    public static Session searchByDateAndTime (NewTime time, NewDate date) {
         insertionSort();
         int low = 0;
         int high = sessions.size() - 1;
         while (low <= high) {
             int mid = (high + low + 1) / 2;
-            if (sessions.get(mid).getSessionTime().equals(time)) {
+            if (sessions.get(mid).getSessionTime().equals(time) && sessions.get(mid).getSessionDate().equals(date)) {
                 return sessions.get(mid);
             }
-            else if (sessions.get(mid).getSessionTime().compareTo(time)<0) {
+            else if (sessions.get(mid).getSessionTime().compareTo(time)<sessions.get(mid).getSessionDate().compareTo(date)) {
                 low = mid + 1;
             }
             else {

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 public class TutorController {
     public static ArrayList <Tutor> tutors = new ArrayList<Tutor>();
     public static void main(String[] args) throws Exception {
+        TutorController.load();
         System.out.println("-------------------------------");
         System.out.println("Tutor Management");
         Scanner sc = new Scanner(System.in);
@@ -11,7 +12,7 @@ public class TutorController {
         System.out.println("[D] to delete tutors");
         System.out.println("[E] to edit tutors");
         char userActionInput = sc.next().charAt(0);
-        while (userActionInput != 'A' && userActionInput != 'D' && userActionInput != 'E'){
+        while ((userActionInput) != 'A' && userActionInput != 'D' && userActionInput != 'E'){
             System.out.println("Incorrect input. Please try again");
             userActionInput = sc.next().charAt(0);
         }
@@ -39,7 +40,6 @@ public class TutorController {
                 throw new RuntimeException(e);
             }
         }
-        sc.close();
     }
 
     private static void returnToMainMenuOrManagement() throws Exception {
@@ -56,7 +56,6 @@ public class TutorController {
         } else {
             Main.main(null);
         }
-        sc.close();
     }
 
     public static void addTutor () throws Exception {
@@ -65,21 +64,29 @@ public class TutorController {
         Tutor tutor = new Tutor(subjectsTaught);
         Scanner sc = new Scanner(System.in);
         System.out.println("-------------------------------");
-        System.out.println("Adding Tutor Method");
-        System.out.print("Enter the student's name: ");
-        String name = sc.nextLine().trim();
+        System.out.println("Adding Tutor ");
+        System.out.println("-------------------------------");
+        System.out.print("Enter the tutor's name: ");
+        String name = sc.nextLine();
         tutor.setName(name);
         int grade = 0;
-        while (grade < 11 || grade > 12)
-        {
-            System.out.print("Enter student grade (between 11 and 12): ");
+        boolean continues = true;
+        do {
+            System.out.print("Enter tutor's grade (between 11 and 12): ");
             try {
                 grade = Integer.parseInt(sc.next());
+                if (grade == 11 || grade == 12) {
+                    break;
+                }
+                else {
+                    System.out.println("Input outside given range");
+                }
+                continues = false;
             }
             catch (NumberFormatException ex) {
                 System.out.println("Incorrect input format");
             }
-        }
+        } while (continues);
         tutor.setGradeLevel(grade);
         boolean noMoreSubjects = false;
         System.out.println("Now we will be entering the subjects that the tutor plans to tutor!");
@@ -94,7 +101,7 @@ public class TutorController {
             char moreSubjects = sc.next().charAt(0);
             while (moreSubjects != 'Y' && moreSubjects != 'N')
             {
-                System.out.println("Incorrect input. More subjects? Press Y / N: ");
+                System.out.print("Incorrect input. More subjects? Press Y / N: ");
                 moreSubjects = sc.next().charAt(0);
             }
             if (moreSubjects == 'N')
@@ -102,16 +109,20 @@ public class TutorController {
                 noMoreSubjects = true;
             }
         } while (!noMoreSubjects);
-        System.out.println("Enter the tutor's tutee's name: ");
-        sc.next();
-        name = sc.nextLine();
-        if (TuteeController.searchByName(name) == null) {
-            System.out.println("Tutee not found.");
+        System.out.println("Does the tutor have a tutee? Type Y if true, anything else if false: ");
+        if (sc.next().charAt(0) == 'Y') {
+            System.out.println("Enter the tutee's name");
+            sc.next();
+            name = sc.nextLine();
+            if (TuteeController.searchByName(name) == null) {
+                System.out.println("Tutee not found.");
+            }
+            else {
+                tutor.setTutee(TuteeController.searchByName(name));
+                TuteeController.searchByName(name).setTutor(tutor);
+            }
         }
-        else {
-            tutor.setTutee(TuteeController.searchByName(name));
-            TuteeController.searchByName(name).setTutor(tutor);
-        }
+        System.out.println("-------------------------------");
         System.out.println("Now, the sessions that the tutor will be available for will be asked");
         boolean noMoreSessions = false;
         Session session = new Session();
@@ -119,7 +130,7 @@ public class TutorController {
             NewDate sessionDate = SessionController.addSessionDateInput();
             NewTime sessionTime = SessionController.addSessionTimeInput();
             String sessionDateAndTime = sessionDate.toString() + " " + sessionTime.toString();
-            if (SessionController.searchByTime(sessionTime) == null)
+            if (SessionController.searchByDateAndTime(sessionTime, sessionDate) == null)
             {
                 System.out.println("Session not found");
                 noMoreSessions = true;
@@ -136,10 +147,11 @@ public class TutorController {
 
     public static void deleteTutor() throws Exception {
         load();
+        System.out.println(tutors);
         Scanner sc = new Scanner(System.in);
         System.out.println("-------------------------------");
-        System.out.println("Deleting Tutor Method");
-        System.out.println("Are you sure you want to delete another Tutor? Press Y/N: ");
+        System.out.println("Deleting Tutor");
+        System.out.println("Are you sure you want to delete a Tutor? Press Y/N: ");
         char delete = sc.next().charAt(0);
         while (delete != 'Y' && delete != 'N')
         {
@@ -148,45 +160,17 @@ public class TutorController {
         }
         if (delete == 'Y')
         {
-            System.out.println("Do you want to delete based on ID or Name? Press I for ID and N for Name ");
-            char idOrName = sc.next().charAt(0);
-            while (idOrName != 'I' && idOrName != 'N')
-            {
-                System.out.println("Wrong input. Do you want to delete based on ID or Name? Press I for ID and N for Name: ");
-                idOrName = sc.next().charAt(0);
-            }
-            if (idOrName == 'I'){
-                int id = 0;
-                boolean correctInput = false;
-                while (!correctInput) {
-                    System.out.print("What is the ID?: ");
-                    try {
-                        id = Integer.parseInt(sc.next());
-                        correctInput = true;
-                    } catch (Exception ex) {
-                        System.out.println("Incorrect input.");
-                    }
-                }
-                boolean tutorPresence = searchById(id);
-                if (!tutorPresence){
-                    System.out.println("No tutor found with that ID.");
-                }
-                else {tutors.remove(id);}
+            System.out.print("What is the tutor's name?: ");
+            sc.nextLine();
+            String name = sc.nextLine();
+            if (searchByName(name) == null){
+                    System.out.println("No tutor found with that name");
             }
             else {
-                System.out.println("What is the name?: ");
-                sc.next();
-                String name = sc.nextLine();
-                String tutorId = searchByName(name).getId();
-                if (tutorId == null){
-                    System.out.println("No tutee found with that name");
-                }
-                else {
-                    tutors.remove(tutors.get(Integer.parseInt(tutorId)));
-                }
+                tutors.remove(searchByName(name));
+                System.out.println("Tutor removed");
             }
         }
-        sc.close();
         save();
         returnToMainMenuOrManagement();
     }
@@ -196,64 +180,36 @@ public class TutorController {
         Scanner sc = new Scanner(System.in);
         System.out.println("-------------------------------");
         System.out.println("Editing Tutor");
-        System.out.println("Are you sure you would like to edit a tutor? Press Y/N");
+        System.out.print("Are you sure you would like to edit a tutor? Press Y/N: ");
         char input = sc.next().charAt(0);
         while (input != 'Y' && input != 'N'){
-            System.out.println("Wrong input. Are you sure you would like to edit a tutor? Press Y/N ");
+            System.out.print("Wrong input. Are you sure you would like to edit a tutor? Press Y/N ");
+            sc.nextLine();
             input = sc.next().charAt(0);
         }
         if (input == 'Y')
         {
-            System.out.println("Do you want to search based on ID or Name? Press I for ID and N for Name ");
-            char idOrName = sc.next().charAt(0);
-            while (idOrName != 'I' && idOrName != 'N')
-            {
-                System.out.println("Wrong input. Do you want to delete based on ID or Name? Press I for ID and N for Name: ");
-                idOrName = sc.next().charAt(0);
-            }
-            if (idOrName == 'I'){
-                int id = 0;
-                boolean correctInput = false;
-                while (!correctInput) {
-                    System.out.print("What is the ID?: ");
-                    try {
-                        id = Integer.parseInt(sc.next());
-                        correctInput = true;
-                    } catch (Exception ex) {
-                        System.out.println("Incorrect input.");
-                    }
-                }
-                boolean tutorPresence = searchById(id);
-                if (!tutorPresence){
-                    System.out.println("No tutor found with that ID");
-                }
-                else {
-                    editTutorInputs(id);
-                }
+            System.out.print("What is the tutor's name?: ");
+            sc.nextLine();
+            String name = sc.nextLine();
+            if (searchByName(name) == null){
+                System.out.println("No tutor found with that name");
             }
             else {
-                System.out.println("What is the name?: ");
-                sc.next();
-                String name = sc.nextLine();
-                if (searchByName(name) == null){ //error with searching algorithm
-                    System.out.println("No tutor found with that name");
-                }
-                else {
-                    editTutorInputs(Integer.parseInt(searchByName(name).getId()));
-                }
+                editTutorInputs(searchByName(name));
             }
         }
         returnToMainMenuOrManagement();
         save();
     }
 
-    public static void editTutorInputs(int id) throws Exception
+    public static void editTutorInputs(Tutor tutor) throws Exception
     {
         Scanner sc = new Scanner(System.in);
         boolean continues = true;
-        Tutor tutor = tutors.get(id);
+        System.out.println("Found tutor with name " + tutor.getName());
         do {
-            System.out.println("Found tutor with name " + tutor.getName() + ". What would you like to edit?" );
+            System.out.println("What would you like to edit?");
             System.out.println("[N] to edit Name");
             System.out.println("[G] to edit Grade");
             System.out.println("[S] to edit a Subject being Taught");
@@ -264,6 +220,7 @@ public class TutorController {
             if (editInput == 'N' || editInput == 'n')
             {
                 System.out.println("What would you like to change the tutor's name to? ");
+                sc.nextLine();
                 String name = sc.nextLine();
                 tutor.setName(name);
             }
@@ -271,7 +228,7 @@ public class TutorController {
                 int grade = 0;
                 while (grade < 11 || grade > 12) //
                 {
-                    System.out.println("Enter the student's actual grade (between 11 and 12) : ");
+                    System.out.print("Enter the tutor's grade(between 11 and 12): ");
                     try {
                         grade = Integer.parseInt(sc.next());
                     }
@@ -293,19 +250,21 @@ public class TutorController {
                     }
                     if (editOrDelete == 'E')
                     {
-                        System.out.println("What would you like to edit? Press S for subject name and L for subject Level");
+                        System.out.print("What would you like to edit? Press S for subject name and L for subject Level");
                         char subjectEdit = sc.next().charAt(0);
                         while(subjectEdit != 'S' && subjectEdit != 'L'){
-                            System.out.println("Incorrect input. What would you like to edit? Press S for subject name and L for subject Level");
+                            System.out.println("Incorrect input. What would you like to edit? Press S for subject name and L for subject Level: ");
                             subjectEdit = sc.next().charAt(0);
                         }
                         if (subjectEdit == 'S')
                         {
-                            System.out.println("Enter subject's new name");
+                            System.out.print("Enter subject's new name: ");
+                            sc.nextLine();
                             tutor.searchSubjectByNameAndLevelAndReturnSubject(subject.getSubjectName(), subject.getSubjectLevel()).setSubjectName(sc.nextLine());
                         }
                         else {
-                            System.out.println("Enter subject's new level");
+                            System.out.print("Enter subject's new level");
+                            sc.nextLine();
                             tutor.searchSubjectByNameAndLevelAndReturnSubject(subject.getSubjectName(), subject.getSubjectLevel()).setSubjectLevel(sc.next().charAt(0));
                         }
                     }
@@ -320,29 +279,30 @@ public class TutorController {
             else if (editInput == 'E' || editInput == 'e') {
                 NewDate date = SessionController.addSessionDateInput();
                 NewTime time = SessionController.addSessionTimeInput();
-                Session sessionPresence = SessionController.searchByTime(time);
+                Session sessionPresence = SessionController.searchByDateAndTime(time, date);
                 String sessionKey = date.toString() + " " + time.toString();
-                if (tutor.searchSession(date, time)) {
-                    System.out.println("Session found. Would you like to remove this tutor from this session? Press Y");
-                    char yesOrNo = sc.next().charAt(0);
-                    if (yesOrNo == 'Y') {
-                        try {
-                            tutor.getSessionsAvailable().replace(sessionKey, false);
-                            SessionController.searchByTime(time).getTutors().remove(tutor);
-                        } catch (RuntimeException r) {
-                            System.out.println("Session doesn't have any tutors. No removing is needed.");
+                try {
+                    if (tutor.searchSession(date, time)) {
+                        System.out.println("Session found. Would you like to remove this tutor from this session? Press Y");
+                        char yesOrNo = sc.next().charAt(0);
+                        if (yesOrNo == 'Y') {
+                            try {
+                                tutor.getSessionsAvailable().replace(sessionKey, false);
+                                SessionController.searchByDateAndTime(time, date).getTutors().remove(tutor);
+                            } catch (RuntimeException r) {
+                                System.out.println("Session doesn't have any tutors. No removing is needed.");
+                            }
                         }
                     }
+                } catch (Exception e) {
+                    System.out.println("Session doesn't exist");
                 }
-                else if (sessionPresence != null) {
+                if (sessionPresence != null) {
                     System.out.println("Session doesn't exist in tutor list. Would you like to have the tutor in this session? Press Y");
                     if (sc.next().charAt(0) == 'Y') {
                         tutor.getSessionsAvailable().put(sessionKey, true);
                         sessionPresence.getTutors().add(tutor);
                     }
-                }
-                else {
-                    System.out.println("Session doesn't exist at all");
                 }
             }
             else if (editInput == 'T' || editInput == 't') {
@@ -360,7 +320,8 @@ public class TutorController {
                 }
                 switch (switchInput) {
                     case 1:
-                        System.out.println("What name does the new tutee have?");
+                        System.out.print("What name does the new tutee have? ");
+                        sc.nextLine();
                         String name = sc.nextLine();
                         if (TuteeController.searchByName(name) == null) {
                             System.out.println("Tutee doesn't exist");
@@ -378,39 +339,42 @@ public class TutorController {
             }
             else if (editInput == 'Q' || editInput == 'q') {
                 continues = false;
+                break;
             }
             else {
                 System.out.println("Incorrect input");
+            }
+            System.out.print("Would you like to edit anything alse about this tutor? Press Y: ");
+            if (sc.next().charAt(0) != 'Y') {
+                continues = false;
             }
         } while(continues);
     }
 
     public static Tutor searchByName(String name){ // linear search by name since name is not unique
-        for (int i = 0; i < tutors.size(); i++) {
-            if (tutors.get(i).getName().equals(name)) {
-                return tutors.get(i);
+        for (Tutor tutor : tutors) {
+            if (tutor.getName().equals(name)) {
+                return tutor;
             }
         }
         return null;
     }
-
-    public static boolean searchById (int ID) { //binary search by id since id is unique
-        insertionSortByID(tutors);
-        int low = 0;
-        int high = tutors.size() - 1;
-        while (low <= high) {
-            int mid = low + (high - low) / 2;
-            if (Integer.parseInt(tutors.get(mid).getId()) == ID) {
-                return true;
+    public static void insertionSortByName(ArrayList<Tutor> tutors)
+    {
+        int c = 0;
+        int len = tutors.size();
+        for(int i = 1; i < len; i++)
+        {
+            Tutor temp = tutors.get(i);
+            int j = i-1;
+            while(j >= 0 && tutors.get(j).getName().compareTo(temp.getName()) > 0)
+            {
+                c++;
+                tutors.set(j+1, tutors.get(j));
+                j--;
             }
-            else if (Integer.parseInt(tutors.get(mid).getId()) < ID) {
-                low = mid + 1;
-            }
-            else {
-                high = mid - 1;
-            }
+            tutors.set(j+1, temp);
         }
-        return false;
     }
     public static void save() throws IOException
     {
@@ -442,45 +406,8 @@ public class TutorController {
         catch (FileNotFoundException e) {System.out.println("File not found");}
         catch (IOException i) {System.out.println("Error initializating the data stream");}
         catch (ClassNotFoundException c) {c.printStackTrace();}
+        System.out.println("To-do loading");
     }
-
-    public static void insertionSortByName(ArrayList<Tutor> tutors)
-    {
-        int c = 0;
-        int len = tutors.size();
-        for(int i = 1; i < len; i++)
-        {
-            Tutor temp = tutors.get(i);
-            int j = i-1;
-            while(j >= 0 && tutors.get(j).getName().compareTo(temp.getName()) > 0)
-            {
-                c++;
-                tutors.set(j+1, tutors.get(j));
-                j--;
-            }
-            tutors.set(j+1, temp);
-        }
-    }
-
-    public static void insertionSortByID(ArrayList<Tutor> tutors)
-    {
-        int c = 0;
-        int len = tutors.size();
-        for(int i = 1; i < len; i++)
-        {
-            Tutor temp = tutors.get(i);
-            int j = i-1;
-            while(j >= 0 && Integer.parseInt(tutors.get(j).getId()) - Integer.parseInt(temp.getId()) > 0)
-            {
-                c++;
-                tutors.set(j+1, tutors.get(j));
-                j--;
-            }
-            tutors.set(j+1, temp);
-        }
-    }
-
-
 
 
 }

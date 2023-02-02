@@ -46,7 +46,6 @@ public class SubjectController implements Serializable{
                 throw new RuntimeException(e);
             }
         }
-        sc.close();
     }
 
     private static void returnToMainMenuOrManagement() throws Exception {

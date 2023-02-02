@@ -31,7 +31,7 @@ public class Subject implements Serializable{
 
     @java.lang.Override
     public java.lang.String toString() {
-        return subjectName + " " + subjectLevel;
+        return subjectName /*+ " " +  subjectLevel */;
     }
 
 

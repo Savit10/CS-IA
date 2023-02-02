@@ -1,19 +1,17 @@
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Scanner;
-import java.util.ServiceLoader;
-
 public class TuteeController implements Serializable{
-        public static ArrayList<Tutee> tutees = new ArrayList<Tutee>();
+        public static ArrayList <Tutee> tutees = new ArrayList<Tutee>();
         public static void main(String[] args) throws Exception {
             System.out.println("-------------------------------");
             System.out.println("Tutee Management");
             Scanner sc = new Scanner(System.in);
-            System.out.println("Press A to add tutees");
-            System.out.println("Press D to delete tutees");
-            System.out.println("Press E to edit tutees");
+            System.out.println("[A] to add tutees");
+            System.out.println("[D] to delete tutees");
+            System.out.println("[E] to edit tutees");
             char userActionInput = sc.next().charAt(0);
-            while (userActionInput != 'A' && userActionInput != 'D' && userActionInput != 'E'){
+            while ((userActionInput) != 'A' && userActionInput != 'D' && userActionInput != 'E'){
                 System.out.println("Incorrect input. Please try again");
                 userActionInput = sc.next().charAt(0);
             }
@@ -58,27 +56,43 @@ public class TuteeController implements Serializable{
                 Main.main(null);
             }
         }
+
         public static void addTutee () throws Exception {
             load();
+            TutorController.load();
             ArrayList<Subject> subjectsLearning = new ArrayList<>();
+            Tutor tutor = new Tutor();
+            tutor.setName("tutorName");
+            TutorController.tutors.add(tutor);
             Tutee tutee = new Tutee(subjectsLearning);
             Scanner sc = new Scanner(System.in);
-            System.out.print("Enter the student's name: ");
-            String name = sc.nextLine();
+            System.out.println("-------------------------------");
+            System.out.println("Adding Tutee");
+            System.out.println("-------------------------------");
+            System.out.print("Enter the tutee's name: ");
+            String name = sc.nextLine().trim();
             tutee.setName(name);
             int grade = 0;
-            while (grade < 11 || grade > 12) // for high school students
-            {
-                System.out.print("Enter student grade (between 11 and 12): ");
+            boolean continues = true;
+            do {
+                System.out.print("Enter tutee's grade (between 11 and 12): ");
                 try {
                     grade = Integer.parseInt(sc.next());
+                    if (grade == 11 || grade == 12) {
+                        break;
+                    }
+                    else {
+                        System.out.println("Input outside given range");
+                    }
+                    continues = false;
                 }
                 catch (NumberFormatException ex) {
                     System.out.println("Incorrect input format");
                 }
-            }
+            } while (continues);
+            tutee.setGradeLevel(grade);
             boolean noMoreSubjects = false;
-            System.out.println("Now we will be entering the subjects that the tutee plans to learn.");
+            System.out.println("Now we will be entering the subjects that the tutee plans to learn!");
             do {
                 Subject subject = SubjectController.subjectInputs();
                 tutee.getSubjectsLearning().add(subject);
@@ -88,33 +102,43 @@ public class TuteeController implements Serializable{
                 }
                 System.out.println("More subjects? Press Y / N: ");
                 char moreSubjects = sc.next().charAt(0);
-                while (moreSubjects != 'Y' && moreSubjects != 'N') {
-                    System.out.println("Incorrect input. More subjects? Press Y / N: ");
+                while (moreSubjects != 'Y' && moreSubjects != 'N')
+                {
+                    System.out.print("Incorrect input. More subjects? Press Y / N: ");
                     moreSubjects = sc.next().charAt(0);
                 }
-                if (moreSubjects == 'N') {
+                if (moreSubjects == 'N')
+                {
                     noMoreSubjects = true;
                 }
             } while (!noMoreSubjects);
-
-            System.out.println("Enter the tutee's tutor's name: ");
-            sc.next();
-            name = sc.nextLine();
-            if (TutorController.searchByName(name) == null) {
-                System.out.println("Tutor not found");
+            System.out.println("Does the tutee have a tutor? Type Y if true, anything else if false: ");
+            if (sc.next().charAt(0) == 'Y') {
+                System.out.println("Enter the tutor's name");
+                sc.nextLine();
+                name = sc.nextLine();
+                System.out.println(name);
+                System.out.println(TutorController.tutors);
+                System.out.println(TutorController.searchByName(name));
+                if (TutorController.searchByName(name) == null) {
+                    System.out.println("Tutor not found.");
+                }
+                else {
+                    tutee.setTutor(TutorController.searchByName(name));
+                    TutorController.searchByName(name).setTutee(tutee);
+                    Tutor tutor1 = TutorController.searchByName(name);
+                    System.out.println(tutor1);
+                }
             }
-            else {
-                tutee.setTutor(TutorController.searchByName(name));
-                TutorController.searchByName(name).setTutee(tutee);
-            }
+            System.out.println("-------------------------------");
             System.out.println("Now, the sessions that the tutee will be available for will be asked");
             boolean noMoreSessions = false;
-            Session session = null;
+            Session session = new Session();
             do {
                 NewDate sessionDate = SessionController.addSessionDateInput();
                 NewTime sessionTime = SessionController.addSessionTimeInput();
                 String sessionDateAndTime = sessionDate.toString() + " " + sessionTime.toString();
-                if (SessionController.searchByTime(sessionTime) == null)
+                if (SessionController.searchByDateAndTime(sessionTime, sessionDate) == null)
                 {
                     System.out.println("Session not found");
                     noMoreSessions = true;
@@ -131,7 +155,10 @@ public class TuteeController implements Serializable{
 
         public static void deleteTutee() throws Exception {
             load();
+            System.out.println(tutees);
             Scanner sc = new Scanner(System.in);
+            System.out.println("-------------------------------");
+            System.out.println("Deleting Tutee");
             System.out.println("Are you sure you want to delete a Tutee? Press Y/N: ");
             char delete = sc.next().charAt(0);
             while (delete != 'Y' && delete != 'N')
@@ -141,41 +168,15 @@ public class TuteeController implements Serializable{
             }
             if (delete == 'Y')
             {
-                System.out.println("Do you want to delete based on ID or Name? Press I for ID and N for Name ");
-                char idOrName = sc.next().charAt(0);
-                while (idOrName != 'I' && idOrName != 'N')
-                {
-                    System.out.println("Wrong input. Do you want to delete based on ID or Name? Press I for ID and N for Name: ");
-                    idOrName = sc.next().charAt(0);
-                }
-                if (idOrName == 'I'){
-                    int id = 0;
-                    System.out.print("What is the ID? (integer): ");
-                    boolean correctInput = false;
-                    while (!correctInput) {
-                        try {
-                            id = Integer.parseInt(sc.next());
-                            correctInput = true;
-                        } catch (Exception ex) {
-                            System.out.println("Incorrect input.");
-                        }
-                    }
-                    boolean tuteePresence = searchIndexById(id);
-                    if (!tuteePresence){
-                        System.out.println("No tutee found with that ID");
-                    }
-                    else {
-                        tutees.remove(id);
-                    }
+                System.out.print("What is the tutee's name?: ");
+                sc.nextLine();
+                String name = sc.nextLine();
+                if (searchByName(name) == null){
+                    System.out.println("No tutee found with that name");
                 }
                 else {
-                    System.out.println("What is the name?: ");
-                    String name = sc.nextLine();
-                    String tuteeId = searchByNameAndReturnId(name);
-                    if (tuteeId == null){
-                        System.out.println("No tutee found with that name.");
-                    }
-                    else {tutees.remove(tutees.get(Integer.parseInt(tuteeId)));}
+                    tutees.remove(searchByName(name));
+                    System.out.println("Tutee removed");
                 }
             }
             save();
@@ -185,62 +186,49 @@ public class TuteeController implements Serializable{
         public static void editTutee() throws Exception {
             load();
             Scanner sc = new Scanner(System.in);
-            System.out.println("Are you sure you would like to edit a tutee? Press Y/N");
+            System.out.println("-------------------------------");
+            System.out.println("Editing Tutee");
+            System.out.print("Are you sure you would like to edit a tutee? Press Y/N: ");
             char input = sc.next().charAt(0);
             while (input != 'Y' && input != 'N'){
-                System.out.println("Wrong input. Are you sure you would like to edit a tutee? Press Y/N ");
+                System.out.print("Wrong input. Are you sure you would like to edit a tutee? Press Y/N ");
+                sc.nextLine();
                 input = sc.next().charAt(0);
             }
             if (input == 'Y')
             {
-                System.out.println("Do you want to search based on ID or Name? Press I for ID and N for Name ");
-                char idOrName = sc.next().charAt(0);
-                while (idOrName != 'I' && idOrName != 'N')
-                {
-                    System.out.println("Wrong input. Do you want to delete based on ID or Name? Press I for ID and N for Name: ");
-                    idOrName = sc.next().charAt(0);
-                }
-                if (idOrName == 'I'){
-                    System.out.print("What is the ID?: ");
-                    int id = sc.nextInt();
-                    boolean tuteePresence = searchIndexById(id);
-                    if (!tuteePresence){
-                        System.out.println("No tutee found with that ID.");
-                    }
-                    else {editTuteeInputs(id);}
+                System.out.print("What is the tutee's name?: ");
+                sc.nextLine();
+                String name = sc.nextLine();
+                if (searchByName(name) == null){
+                    System.out.println("No tutee found with that name");
                 }
                 else {
-                    System.out.println("What is the name?: ");
-                    String name = sc.next() + " " + sc.next();
-                    System.out.println(name);
-                    String tuteeId = searchByNameAndReturnId(name);
-                    if (tuteeId == null){
-                        System.out.println("No tutee found with that name");
-                    }
-                    else {editTuteeInputs(Integer.parseInt(tuteeId));}
+                    editTuteeInputs(searchByName(name));
                 }
             }
             returnToMainMenuOrManagement();
             save();
         }
 
-        public static void editTuteeInputs(int id) throws Exception
+        public static void editTuteeInputs(Tutee tutee) throws Exception
         {
             Scanner sc = new Scanner(System.in);
             boolean continues = true;
-            Tutee tutee = tutees.get(id);
+            System.out.println("Found tutee with name " + tutee.getName());
             do {
-                System.out.println("Found tutee with name " + tutee.getName() + ". What would you like to edit?" );
-                System.out.println("Press N to edit Name");
-                System.out.println("Press G to edit Grade");
-                System.out.println("Press S to edit a Subject being learnt");
-                System.out.println("Press E to edit a Session the Tutee is Available for");
-                System.out.println("Press T to edit the Tutee's Tutor");
-                System.out.println("Press Q to Quit Editing");
+                System.out.println("What would you like to edit?");
+                System.out.println("[N] to edit Name");
+                System.out.println("[G] to edit Grade");
+                System.out.println("[S] to edit a Subject being Learnt");
+                System.out.println("[E] to edit a Session the Tutee is Available for");
+                System.out.println("[T] to edit the Tutee's Tutor");
+                System.out.println("[Q] to Quit Editing");
                 char editInput = sc.next().charAt(0);
                 if (editInput == 'N' || editInput == 'n')
                 {
                     System.out.println("What would you like to change the tutee's name to? ");
+                    sc.nextLine();
                     String name = sc.nextLine();
                     tutee.setName(name);
                 }
@@ -248,7 +236,7 @@ public class TuteeController implements Serializable{
                     int grade = 0;
                     while (grade < 11 || grade > 12) //
                     {
-                        System.out.println("Enter the student's actual grade (between 11 and 12) : ");
+                        System.out.print("Enter the tutee's grade(between 11 and 12): ");
                         try {
                             grade = Integer.parseInt(sc.next());
                         }
@@ -260,8 +248,7 @@ public class TuteeController implements Serializable{
                 }
                 else if (editInput == 'S' || editInput == 's') {
                     Subject subject = SubjectController.subjectInputs();
-                    boolean subjectTuteePresence = tutee.searchSubject(subject.getSubjectName(), subject.getSubjectLevel()) != null; // searches the tutee's list of subjects learning
-                    boolean subjectOverallPresence = SubjectController.searchSubject(subject); // searches the overall list of subjects
+                    boolean subjectTuteePresence = tutee.searchSubjectByNameAndLevel(subject.getSubjectName(), subject.getSubjectLevel()); // searches the tutee's list of subjects learning
                     if (subjectTuteePresence) {
                         System.out.println("Subject found for tutee. Press E for editing subject and D for deleting subject");
                         char editOrDelete = sc.next().charAt(0);
@@ -271,235 +258,117 @@ public class TuteeController implements Serializable{
                         }
                         if (editOrDelete == 'E')
                         {
-                            System.out.println("What would you like to edit? Press S for subject name and L for subject Level");
+                            System.out.print("What would you like to edit? Press S for subject name and L for subject Level");
                             char subjectEdit = sc.next().charAt(0);
                             while(subjectEdit != 'S' && subjectEdit != 'L'){
-                                System.out.println("Incorrect input. What would you like to edit? Press S for subject name and L for subject Level");
+                                System.out.println("Incorrect input. What would you like to edit? Press S for subject name and L for subject Level: ");
                                 subjectEdit = sc.next().charAt(0);
                             }
                             if (subjectEdit == 'S')
                             {
-                                System.out.println("Enter subject's new name");
-                                tutee.searchSubject(subject.getSubjectName(), subject.getSubjectLevel()).setSubjectName(sc.next());
+                                System.out.print("Enter subject's new name: ");
+                                sc.nextLine();
+                                tutee.searchSubjectByNameAndLevelAndReturnSubject(subject.getSubjectName(), subject.getSubjectLevel()).setSubjectName(sc.nextLine());
                             }
                             else {
-                                System.out.println("Enter subject's new level");
-                                tutee.searchSubject(subject.getSubjectName(), subject.getSubjectLevel()).setSubjectLevel(sc.next().charAt(0));
+                                System.out.print("Enter subject's new level");
+                                sc.nextLine();
+                                tutee.searchSubjectByNameAndLevelAndReturnSubject(subject.getSubjectName(), subject.getSubjectLevel()).setSubjectLevel(sc.next().charAt(0));
                             }
                         }
                         else {
-                            tutee.getSubjectsLearning().remove(tutee.searchSubject(subject.getSubjectName(), subject.getSubjectLevel()));
-                        }
-                    }
-                    else if (subjectOverallPresence){
-                        System.out.println("Subject not found for tutee but found in overall list. Would you like to add it to the tutee's list? Press Y");
-                        char addingChar = sc.next().charAt(0);
-                        if (addingChar == 'Y')
-                        {
-                            tutee.getSubjectsLearning().add(SubjectController.searchSubjectReturnSubject(subject.getSubjectName(), subject.getSubjectLevel()));
+                            tutee.getSubjectsLearning().remove(tutee.searchSubjectByNameAndLevelAndReturnSubject(subject.getSubjectName(), subject.getSubjectLevel()));
                         }
                     }
                     else {
-                        System.out.println("Subject not found at all");
+                        System.out.println("Subject not found.");
                     }
                 }
                 else if (editInput == 'E' || editInput == 'e') {
                     NewDate date = SessionController.addSessionDateInput();
                     NewTime time = SessionController.addSessionTimeInput();
-                    Session sessionPresence = SessionController.searchByTime(time);
+                    Session sessionPresence = SessionController.searchByDateAndTime(time, date);
                     String sessionKey = date.toString() + " " + time.toString();
-                    if (tutee.searchSession(date, time)) {
-                        System.out.println("Session found. Would you like to remove this tutee from this session? Press Y");
-                        char yesOrNo = sc.next().charAt(0);
-                        if (yesOrNo == 'Y') {
-                            try {
-                                tutee.getSessionsAvailable().replace(sessionKey, false);
-                                SessionController.searchByTime(time).getTutees().remove(tutee);
-                            } catch (RuntimeException r) {
-                                System.out.println("Session doesn't have any tutees. No removing is needed.");
+                    try {
+                        if (tutee.searchSession(date, time)) {
+                            System.out.println("Session found. Would you like to remove this tutor from this session? Press Y");
+                            char yesOrNo = sc.next().charAt(0);
+                            if (yesOrNo == 'Y') {
+                                try {
+                                    tutee.getSessionsAvailable().replace(sessionKey, false);
+                                    SessionController.searchByDateAndTime(time, date).getTutees().remove(tutee);
+                                } catch (RuntimeException r) {
+                                    System.out.println("Session doesn't have any tutees. No removing is needed.");
+                                }
                             }
                         }
+                    } catch (Exception e) {
+                        System.out.println("Session doesn't exist");
                     }
-                    else if (sessionPresence != null) {
+                    if (sessionPresence != null) {
                         System.out.println("Session doesn't exist in tutee list. Would you like to have the tutee in this session? Press Y");
                         if (sc.next().charAt(0) == 'Y') {
                             tutee.getSessionsAvailable().put(sessionKey, true);
                             sessionPresence.getTutees().add(tutee);
                         }
                     }
-                    else {
-                        System.out.println("Session doesn't exist at all.");
-                    }
                 }
                 else if (editInput == 'T' || editInput == 't') {
-                    boolean inputInt = false;
-                    int integerInput = 0;
-                    while (!inputInt) {
+                    int switchInput = 0;
+                    boolean correctInput = false;
+                    while (!correctInput) {
                         try {
                             System.out.println("[1] To change tutor");
                             System.out.println("[2] To not have a tutor right now");
-                            integerInput = Integer.parseInt(sc.next());
-                            inputInt = true;
-                        }
-                        catch (Exception e) {
-                            System.out.print("Incorrect input");
+                            switchInput = Integer.parseInt(sc.next());
+                            correctInput = true;
+                        } catch (Exception ex) {
+                            System.out.println("Incorrect input.");
                         }
                     }
-                    switch (integerInput) {
+                    switch (switchInput) {
                         case 1:
-                            System.out.println("What name does this tutor have?");
+                            System.out.print("What name does the new tutor have? ");
+                            sc.nextLine();
                             String name = sc.nextLine();
                             if (TutorController.searchByName(name) == null) {
                                 System.out.println("Tutor doesn't exist");
                             } else {
                                 tutee.setTutor(TutorController.searchByName(name));
                             }
+                            break;
                         case 2:
                             tutee.setTutor(null);
+                            break;
                         default:
                             System.out.println("Incorrect input");
+                            break;
                     }
                 }
                 else if (editInput == 'Q' || editInput == 'q') {
                     continues = false;
+                    break;
                 }
                 else {
                     System.out.println("Incorrect input");
                 }
+                System.out.print("Would you like to edit anything alse about this tutee? Press Y: ");
+                if (sc.next().charAt(0) != 'Y') {
+                    continues = false;
+                }
             } while(continues);
         }
-        public static boolean searchIndexById (int ID) { //complete
-            int low = 0;
-            int high = tutees.size() - 1;
-            while (low <= high) {
-                int mid = low + (high - low) / 2;
-                if (Integer.parseInt(tutees.get(mid).getId()) == ID) {
-                    return true;
-                }
-                else if (Integer.parseInt(tutees.get(mid).getId()) < ID) {
-                    low = mid + 1;
-                }
-                else {
-                    high = mid - 1;
-                }
-            }
-            return false;
-        }
 
-        public static Tutee searchByName(String name) { //complete
-            insertionSort(tutees);
-            int low = 0;
-            int high = tutees.size() - 1;
-            while (low <= high) {
-                int mid = low + (high - low) / 2;
-                if (tutees.get(mid).getName().equals(name)) {
-                    return tutees.get(mid);
-                }
-                else if (tutees.get(mid).getId().compareTo(name)<0) {
-                    low = mid + 1;
-                }
-                else {
-                    high = mid - 1;
+        public static Tutee searchByName(String name){ // linear search by name since name is not unique
+            for (Tutee tutee : tutees) {
+                if (tutee.getName().equals(name)) {
+                    return tutee;
                 }
             }
             return null;
         }
-        public static String searchByNameAndReturnId(String name) throws Exception {
-            load();
-            if (tutees.size() > 2) {
-                insertionSort(tutees);
-                int low = 0;
-                int high = tutees.size() - 1;
-                while (low <= high) {
-                    int mid = low + (high - low) / 2;
-                    if (tutees.get(mid).getName().equals(name)) {
-                        return tutees.get(mid).getId();
-                    } else if (tutees.get(mid).getId().compareTo(name) < 0) {
-                        low = mid + 1;
-                    } else {
-                        high = mid - 1;
-                    }
-                }
-            }
-            else {
-                System.out.println("Tutee list: " + tutees.toString());
-                for (Tutee tutee : tutees) {
-                    System.out.println("    tutee name: " + tutee.getName());
-                    if (tutee.getName().equals(name)) {
-                        return tutee.getId();
-                    }
-                }
-            }
-            save();
-            return null;
-        }
-        public static void save() throws IOException
-        {
-            System.out.println("Saving changes");
-            try {
-                FileOutputStream f = new FileOutputStream(new File("tutees.txt"));
-                ObjectOutputStream o = new ObjectOutputStream(f);
-                o.writeObject(tutees);
-                System.out.println("Changes saved to file");
-            } catch (IOException e) {
-                System.out.println("Error intializing stream");
-            }
-        }
 
-        public static void load() throws Exception //
-        {
-            ArrayList<Tutee> t = null;
-            try {
-                FileInputStream fi = new FileInputStream("tutees.txt");
-                ObjectInputStream oi = new ObjectInputStream(fi);
-                tutees = (ArrayList<Tutee>) oi.readObject();
-            }
-            catch (FileNotFoundException e) {
-                System.out.println("File not found");
-            }
-            catch (ClassNotFoundException c) {
-                c.printStackTrace();
-            }
-        }
-
-        public static void insertionSort(ArrayList<Tutee> tutees)
-        {
-            int c = 0;
-            int len = tutees.size();
-            for(int i = 1; i < len; i++)
-            {
-                Tutee temp = tutees.get(i);
-                int j = i-1;
-                while(j >= 0 && tutees.get(j).getName().compareTo(temp.getName()) > 0)
-                {
-                    c++;
-                    tutees.set(j+1, tutees.get(j));
-                    j--;
-                }
-                tutees.set(j+1, temp);
-            }
-        }
-
-    public static boolean searchById(int ID) { //binary search by id since id is unique
-        insertionSortByID(tutees);
-        int low = 0;
-        int high = tutees.size() - 1;
-        while (low <= high) {
-            int mid = low + (high - low) / 2;
-            if (Integer.parseInt(tutees.get(mid).getId()) == ID) {
-                return true;
-            }
-            else if (Integer.parseInt(tutees.get(mid).getId()) < ID) {
-                low = mid + 1;
-            }
-            else {
-                high = mid - 1;
-            }
-        }
-        return false;
-    }
-
-    public static void insertionSortByID(ArrayList<Tutee> tutees)
+    public static void insertionSort(ArrayList<Tutee> tutees)
     {
         int c = 0;
         int len = tutees.size();
@@ -507,7 +376,7 @@ public class TuteeController implements Serializable{
         {
             Tutee temp = tutees.get(i);
             int j = i-1;
-            while(j >= 0 && Integer.parseInt(tutees.get(j).getId()) - Integer.parseInt(temp.getId()) > 0)
+            while(j >= 0 && tutees.get(j).getName().compareTo(temp.getName()) > 0)
             {
                 c++;
                 tutees.set(j+1, tutees.get(j));
@@ -516,4 +385,35 @@ public class TuteeController implements Serializable{
             tutees.set(j+1, temp);
         }
     }
+        public static void save() throws IOException
+        {
+            System.out.println("-------------------------------");
+            System.out.println("Saving changes");
+            try {
+                FileOutputStream f = new FileOutputStream(new File ("tutees.txt")); //creates new File
+                ObjectOutputStream o = new ObjectOutputStream(f);
+                o.writeObject(tutees); //writes tutees object to file
+                o.close();
+                f.close();
+                System.out.println("Changes saved to file");
+            } catch (IOException e) {
+                System.out.println("Error intializing stream");
+            }
+        }
+        public static void load() throws Exception
+        {
+            System.out.println("-------------------------------");
+            System.out.println("Loading data");
+            try {
+                FileInputStream fi = new FileInputStream("tutees.txt"); //attempts to open file
+                ObjectInputStream oi = new ObjectInputStream(fi);
+                tutees = (ArrayList<Tutee>) oi.readObject(); //reads object from file and casts it to arraylist
+                oi.close();
+                fi.close();
+                System.out.println("Data Loaded");
+            }
+            catch (FileNotFoundException e) {System.out.println("File not found");}
+            catch (IOException i) {System.out.println("Error initializating the data stream");}
+            catch (ClassNotFoundException c) {c.printStackTrace();}
+        }
     }

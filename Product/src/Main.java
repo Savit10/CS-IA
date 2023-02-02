@@ -5,7 +5,6 @@ public class Main {
         Scanner sc = new Scanner(System.in);
         boolean continues = true;
         System.out.println("-------------------------------");
-        System.out.println("Welcome to the Peer Tutoring Management System!");
         System.out.println("Main Menu");
         do
         {
