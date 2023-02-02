@@ -419,14 +419,12 @@ public class TutorController {
     }
     public static void load() throws Exception
     {
-        System.out.println("Loading sources");
         try {
             FileInputStream fi = new FileInputStream("tutors.txt"); //attempts to open file
             ObjectInputStream oi = new ObjectInputStream(fi);
             tutors = (ArrayList<Tutor>) oi.readObject(); //reads object from file and casts it to arraylist
             oi.close();
             fi.close();
-            System.out.println(tutors.toString());
         }
         catch (FileNotFoundException e) {System.out.println("File not found");}
         catch (IOException i) {System.out.println("Error initializating the data stream");}

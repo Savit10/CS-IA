@@ -450,7 +450,6 @@ public class TuteeController implements Serializable{
                 FileInputStream fi = new FileInputStream("tutees.txt");
                 ObjectInputStream oi = new ObjectInputStream(fi);
                 tutees = (ArrayList<Tutee>) oi.readObject();
-                System.out.println("LOADED tutees from load(): " + tutees.toString());
             }
             catch (FileNotFoundException e) {
                 System.out.println("File not found");
