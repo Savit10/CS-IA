@@ -7,6 +7,8 @@ public class SessionController {
     static ArrayList <Session> sessions = new ArrayList <Session> ();
 
     public static void main(String[] args) throws Exception {
+        System.out.println("-------------------------------");
+        System.out.println("Session Management");
         load();
         Scanner sc = new Scanner(System.in);
         System.out.println("Press A to add Sessions");
@@ -43,7 +45,9 @@ public class SessionController {
         }
     }
 
-    public static void addSession () throws Exception { //Method, along with submethods, looks fine
+    public static void addSession () throws Exception {
+        System.out.println("-------------------------------");
+        System.out.println("Adding Session");
         Scanner sc = new Scanner(System.in);
         System.out.println("Are you sure you want to add a new session? Type Y/N");
         char booleanVariable = sc.next().charAt(0);
@@ -129,6 +133,8 @@ public class SessionController {
     }
 
     public static void deleteSession () throws Exception {//complete method, seems fine
+        System.out.println("-------------------------------");
+        System.out.println("Deleting Session");
         load();
         NewDate sessionDate = addSessionDateInput();
         NewTime sessionTime = addSessionTimeInput();
@@ -142,6 +148,7 @@ public class SessionController {
         returnToMainOrManagement();
     }
     private static void returnToMainOrManagement() throws Exception {
+        System.out.println("-------------------------------");
         Scanner sc = new Scanner(System.in);
         char returnToWhat = ' ';
         do {
@@ -157,6 +164,8 @@ public class SessionController {
         }
     }
     public static void editSession () throws Exception {
+        System.out.println("-------------------------------");
+        System.out.println("Editing Session");
         load();
         System.out.println(sessions.toString());
         Scanner sc = new Scanner(System.in);
@@ -242,13 +251,14 @@ public class SessionController {
     }
     public static void save() throws IOException
     {
+        System.out.print("Saving changes to file... ");
         try {
             FileOutputStream f = new FileOutputStream(new File("sessions.txt"));
             ObjectOutputStream o = new ObjectOutputStream(f);
             o.writeObject(sessions);
             o.close();
             f.close();
-            System.out.println("Saved changes");
+            System.out.println("Changes file");
         } catch (IOException e) {
             System.out.println("Error intializing saving data stream");
         }
@@ -256,10 +266,12 @@ public class SessionController {
 
     public static void load() throws Exception
     {
+        System.out.println("Loading data from file");
         try {
             FileInputStream fi = new FileInputStream("sessions.txt");
             ObjectInputStream oi = new ObjectInputStream(fi);
             sessions = (ArrayList<Session>) oi.readObject();
+            System.out.println("Data Loaded");
         }
         catch (FileNotFoundException e) {
             System.out.println("File not found");

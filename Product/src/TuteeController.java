@@ -6,6 +6,8 @@ import java.util.ServiceLoader;
 public class TuteeController implements Serializable{
         public static ArrayList<Tutee> tutees = new ArrayList<Tutee>();
         public static void main(String[] args) throws Exception {
+            System.out.println("-------------------------------");
+            System.out.println("Tutee Management");
             Scanner sc = new Scanner(System.in);
             System.out.println("Press A to add tutees");
             System.out.println("Press D to delete tutees");
@@ -42,6 +44,7 @@ public class TuteeController implements Serializable{
         }
 
         private static void returnToMainMenuOrManagement() throws Exception {
+            System.out.println("-------------------------------");
             Scanner sc = new Scanner(System.in);
             char returnToWhat = ' ';
             do {

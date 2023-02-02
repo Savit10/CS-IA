@@ -2,44 +2,44 @@ import java.io.Serializable;
 import java.util.*;
 
 public class Ranking implements Serializable {
-    public HashMap<Tutor, ArrayList<Double>> subjectUnderstandingRatings; // the tutor's understanding and knowledge of the subject content
-    public HashMap<Tutor, ArrayList<Double>> explanationAbilityRatings; // the tutor's clarity and ability to explain and simplify concepts
-    public HashMap<Tutor, ArrayList<Double>> attitudeAbilityRatings; // the tutor's perceived effort and intention in tutoring
-    public HashMap<Tutor, ArrayList<Double>> progressRatings; // the tutee's progress in the subject as a consequence of taking part in tutoring
+    private LinkedHashMap<Tutor, ArrayList<Double>> subjectUnderstandingRatings; // the tutor's understanding and knowledge of the subject content
+    private LinkedHashMap<Tutor, ArrayList<Double>> explanationAbilityRatings; // the tutor's clarity and ability to explain and simplify concepts
+    private LinkedHashMap<Tutor, ArrayList<Double>> attitudeAbilityRatings; // the tutor's perceived effort and intention in tutoring
+    private LinkedHashMap<Tutor, ArrayList<Double>> progressRatings; // the tutee's progress in the subject as a consequence of taking part in tutoring
 
-    public HashMap<Tutor, ArrayList<Double>> getSubjectUnderstandingRatings() {
+    public LinkedHashMap<Tutor, ArrayList<Double>> getSubjectUnderstandingRatings() {
         return subjectUnderstandingRatings;
     }
 
-    public void setSubjectUnderstandingRatings(HashMap<Tutor, ArrayList<Double>> subjectUnderstandingRatings) {
+    public void setSubjectUnderstandingRatings(LinkedHashMap<Tutor, ArrayList<Double>> subjectUnderstandingRatings) {
         this.subjectUnderstandingRatings = subjectUnderstandingRatings;
     }
 
-    public HashMap<Tutor, ArrayList<Double>> getExplanationAbilityRatings() {
+    public LinkedHashMap<Tutor, ArrayList<Double>> getExplanationAbilityRatings() {
         return explanationAbilityRatings;
     }
 
-    public void setExplanationAbilityRatings(HashMap<Tutor, ArrayList<Double>> explanationAbilityRatings) {
+    public void setExplanationAbilityRatings(LinkedHashMap<Tutor, ArrayList<Double>> explanationAbilityRatings) {
         this.explanationAbilityRatings = explanationAbilityRatings;
     }
 
-    public HashMap<Tutor, ArrayList<Double>> getAttitudeAbilityRatings() {
+    public LinkedHashMap<Tutor, ArrayList<Double>> getAttitudeAbilityRatings() {
         return attitudeAbilityRatings;
     }
 
-    public void setAttitudeAbilityRatings(HashMap<Tutor, ArrayList<Double>> attitudeAbilityRatings) {
+    public void setAttitudeAbilityRatings(LinkedHashMap<Tutor, ArrayList<Double>> attitudeAbilityRatings) {
         this.attitudeAbilityRatings = attitudeAbilityRatings;
     }
 
-    public HashMap<Tutor, ArrayList<Double>> getProgressRatings() {
+    public LinkedHashMap<Tutor, ArrayList<Double>> getProgressRatings() {
         return progressRatings;
     }
 
-    public void setProgressRatings(HashMap<Tutor, ArrayList<Double>> progressRatings) {
+    public void setProgressRatings(LinkedHashMap<Tutor, ArrayList<Double>> progressRatings) {
         this.progressRatings = progressRatings;
     }
 
-    public Ranking(HashMap<Tutor, ArrayList<Double>> subjectUnderstandingRatings, HashMap<Tutor, ArrayList<Double>> explanationAbilityRatings, HashMap<Tutor, ArrayList<Double>> attitudeAbilityRatings, HashMap<Tutor, ArrayList<Double>> progressRatings) {
+    public Ranking(LinkedHashMap<Tutor, ArrayList<Double>> subjectUnderstandingRatings, LinkedHashMap<Tutor, ArrayList<Double>> explanationAbilityRatings, LinkedHashMap<Tutor, ArrayList<Double>> attitudeAbilityRatings, LinkedHashMap<Tutor, ArrayList<Double>> progressRatings) {
         this.subjectUnderstandingRatings = subjectUnderstandingRatings;
         this.explanationAbilityRatings = explanationAbilityRatings;
         this.attitudeAbilityRatings = attitudeAbilityRatings;
@@ -61,8 +61,8 @@ public class Ranking implements Serializable {
     }
 
     //calculates the overall rating of a certain attribute using the list of doubles provided
-    public static HashMap<Tutor, Double> calculateOverallRating(HashMap<Tutor, ArrayList<Double>> ratings) {
-        HashMap<Tutor, Double> overallRatings = new HashMap<>();
+    public static LinkedHashMap<Tutor, Double> calculateOverallRating(LinkedHashMap<Tutor, ArrayList<Double>> ratings) {
+        LinkedHashMap<Tutor, Double> overallRatings = new LinkedHashMap<>();
         double overallRating = 0;
         for (Tutor tutor : ratings.keySet()) { // https://www.w3schools.com/java/java_hashmap.asp - iterates through a hashmap's keys
             ArrayList<Double> ratingsList = ratings.get(tutor);
@@ -77,29 +77,29 @@ public class Ranking implements Serializable {
     // brings together the attributes of tutor rankings HashMaps into one HashMap
     public void rank() {
         //calculates the overall rating of the list of doubles and instantiates a new HashMap with key: Tutor, Double: overall attribute rating
-        HashMap<Tutor, Double> overallSubjectUnderstanding = calculateOverallRating(this.subjectUnderstandingRatings);
-        HashMap<Tutor, Double> overallExplanationAbility = calculateOverallRating(this.explanationAbilityRatings);
-        HashMap<Tutor, Double> overallTutoringAttitude = calculateOverallRating(this.attitudeAbilityRatings);
-        HashMap<Tutor, Double> overallTuteeProgress = calculateOverallRating(this.progressRatings);
+        LinkedHashMap<Tutor, Double> overallSubjectUnderstanding = calculateOverallRating(this.subjectUnderstandingRatings);
+        LinkedHashMap<Tutor, Double> overallExplanationAbility = calculateOverallRating(this.explanationAbilityRatings);
+        LinkedHashMap<Tutor, Double> overallTutoringAttitude = calculateOverallRating(this.attitudeAbilityRatings);
+        LinkedHashMap<Tutor, Double> overallTuteeProgress = calculateOverallRating(this.progressRatings);
         //creates a Hashmap of Maps with all the ratings to add to
-        List<HashMap<Tutor, Double>> listOfMaps = new ArrayList<>();
+        List<LinkedHashMap<Tutor, Double>> listOfMaps = new ArrayList<>();
         listOfMaps.add(overallSubjectUnderstanding);
         listOfMaps.add(overallExplanationAbility);
         listOfMaps.add(overallTutoringAttitude);
         listOfMaps.add(overallTuteeProgress);
 
-        HashMap<Tutor, ArrayList<Double>> tutorOverallRatings = new HashMap<>();
+        LinkedHashMap<Tutor, ArrayList<Double>> tutorOverallRatings = new LinkedHashMap<>();
         ArrayList<Tutor> tutorArrayList = new ArrayList<>(overallSubjectUnderstanding.keySet());
 
         for (Tutor tutor: tutorArrayList) {
             ArrayList<Double> ratings = new ArrayList<>();
-            for (HashMap<Tutor, Double> currentHashMap : listOfMaps) {
+            for (LinkedHashMap<Tutor, Double> currentHashMap : listOfMaps) {
                 ratings.add(currentHashMap.get(tutor));
             }
             tutorOverallRatings.put(tutor, ratings);
         }
 
-        HashMap<Tutor, Double> tutorOverallRating = new HashMap<>();
+        LinkedHashMap<Tutor, Double> tutorOverallRating = new LinkedHashMap<>();
         double overallTutorRating = 0;
         for (Tutor tutor: tutorOverallRatings.keySet()) {
             overallTutorRating = 0.4*tutorOverallRatings.get(tutor).get(0) + 0.3*tutorOverallRatings.get(tutor).get(1) + 0.2*tutorOverallRatings.get(tutor).get(2) + 0.1*tutorOverallRatings.get(tutor).get(3);
@@ -113,6 +113,7 @@ public class Ranking implements Serializable {
         for(int i = 1; i < doubles.size(); i++)
         {
             double temp = doubles.get(i);
+            Tutor tempTutor = tutors.get(i);
             int j = i-1;
             while(j >= 0  && (temp < doubles.get(j)))
             {
@@ -121,9 +122,9 @@ public class Ranking implements Serializable {
                 j--;
             }
             doubles.set(j+1, temp);
-            tutors.set(j+1, tutors.get(i));
+            tutors.set(j+1, tempTutor);
         }
-        //reversing list
+        //reversing list using stacks
         Stack <Double> doubleStack = new Stack<>();
         Stack <Tutor> tutorStack = new Stack<>();
         for (Double aDouble : doubles) {

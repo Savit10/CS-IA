@@ -8,10 +8,12 @@ public class SubjectController implements Serializable{
     public static ArrayList<Subject> subjects = new ArrayList<Subject>();
 
     public static void main(String[] args) {
+        System.out.println("-------------------------------");
+        System.out.println("Subject Management");
         Scanner sc = new Scanner(System.in);
-        System.out.println("Press A to add Subject");
-        System.out.println("Press D to delete Subject");
-        System.out.println("Press E to edit Subject");
+        System.out.println("[A] to add Subject");
+        System.out.println("[D] to delete Subject");
+        System.out.println("[E] to edit Subject");
         char userActionInput = sc.next().charAt(0);
         while (userActionInput != 'A' && userActionInput != 'D' && userActionInput != 'E'){
             System.out.println("Incorrect input. Please try again");
@@ -48,6 +50,7 @@ public class SubjectController implements Serializable{
     }
 
     private static void returnToMainMenuOrManagement() throws Exception {
+        System.out.println("-------------------------------");
         Scanner sc = new Scanner(System.in);
         System.out.println("[1] to return to Subject Management");
         System.out.println("[2] to return to Main Menu");
@@ -65,6 +68,7 @@ public class SubjectController implements Serializable{
         }
     }
     public static Subject subjectInputs () {
+        System.out.println("-------------------------------");
         Scanner sc = new Scanner(System.in);
         System.out.print("Subject name: ");
         String subjectName = sc.nextLine();
@@ -78,6 +82,7 @@ public class SubjectController implements Serializable{
     }
     public static void addSubject () throws Exception
     {
+        System.out.println("Adding Subject");
         load();
         Subject subject = subjectInputs();
         subjects.add(subject);
@@ -86,6 +91,8 @@ public class SubjectController implements Serializable{
 
     }
     public static void deleteSubject() throws Exception {
+        System.out.println("-------------------------------");
+        System.out.println("Deleting Subject");
         load();
         Subject subject = subjectInputs();
         if (searchSubject(subject)) {
@@ -99,6 +106,8 @@ public class SubjectController implements Serializable{
     }
     public static void editSubject() throws Exception {
         load();
+        System.out.println("-------------------------------");
+        System.out.println("Editing Subject");
         System.out.println("subjects list" + subjects.toString());
         Scanner sc = new Scanner(System.in);
         System.out.print("Subject name: ");
@@ -209,7 +218,8 @@ public class SubjectController implements Serializable{
 
     public static void save() throws IOException
     {
-        System.out.println("Saving changes");
+        System.out.println("-------------------------------");
+        System.out.println("Saving changes to file");
         try {
             FileOutputStream f = new FileOutputStream(new File("subjects.txt"));
             ObjectOutputStream o = new ObjectOutputStream(f);
@@ -224,6 +234,8 @@ public class SubjectController implements Serializable{
 
     public static void load() throws Exception
     {
+        System.out.println("-------------------------------");
+        System.out.println("Loading data");
         ArrayList<Subject> t = null;
         try {
             FileInputStream fi = new FileInputStream("subjects.txt");
@@ -231,6 +243,7 @@ public class SubjectController implements Serializable{
             subjects = (ArrayList<Subject>) oi.readObject();
             oi.close();
             fi.close();
+            System.out.println("Data loaded");
         }
         catch (FileNotFoundException e) {
             System.out.println("File not found");

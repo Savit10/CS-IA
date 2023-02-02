@@ -4,6 +4,8 @@ import java.util.ArrayList;
 public class TutorController {
     public static ArrayList <Tutor> tutors = new ArrayList<Tutor>();
     public static void main(String[] args) throws Exception {
+        System.out.println("-------------------------------");
+        System.out.println("Tutor Management");
         Scanner sc = new Scanner(System.in);
         System.out.println("[A] to add tutors");
         System.out.println("[D] to delete tutors");
@@ -41,6 +43,7 @@ public class TutorController {
     }
 
     private static void returnToMainMenuOrManagement() throws Exception {
+        System.out.println("-------------------------------");
         Scanner sc = new Scanner(System.in);
         char returnToWhat = ' ';
         do {
@@ -61,6 +64,8 @@ public class TutorController {
         ArrayList<Subject> subjectsTaught = new ArrayList<>();
         Tutor tutor = new Tutor(subjectsTaught);
         Scanner sc = new Scanner(System.in);
+        System.out.println("-------------------------------");
+        System.out.println("Adding Tutor Method");
         System.out.print("Enter the student's name: ");
         String name = sc.nextLine().trim();
         tutor.setName(name);
@@ -132,6 +137,8 @@ public class TutorController {
     public static void deleteTutor() throws Exception {
         load();
         Scanner sc = new Scanner(System.in);
+        System.out.println("-------------------------------");
+        System.out.println("Deleting Tutor Method");
         System.out.println("Are you sure you want to delete another Tutor? Press Y/N: ");
         char delete = sc.next().charAt(0);
         while (delete != 'Y' && delete != 'N')
@@ -187,6 +194,8 @@ public class TutorController {
     public static void editTutor() throws Exception {
         load();
         Scanner sc = new Scanner(System.in);
+        System.out.println("-------------------------------");
+        System.out.println("Editing Tutor");
         System.out.println("Are you sure you would like to edit a tutor? Press Y/N");
         char input = sc.next().charAt(0);
         while (input != 'Y' && input != 'N'){
@@ -405,6 +414,7 @@ public class TutorController {
     }
     public static void save() throws IOException
     {
+        System.out.println("-------------------------------");
         System.out.println("Saving changes");
         try {
             FileOutputStream f = new FileOutputStream(new File ("tutors.txt")); //creates new File
@@ -419,12 +429,15 @@ public class TutorController {
     }
     public static void load() throws Exception
     {
+        System.out.println("-------------------------------");
+        System.out.println("Loading data");
         try {
             FileInputStream fi = new FileInputStream("tutors.txt"); //attempts to open file
             ObjectInputStream oi = new ObjectInputStream(fi);
             tutors = (ArrayList<Tutor>) oi.readObject(); //reads object from file and casts it to arraylist
             oi.close();
             fi.close();
+            System.out.println("Data Loaded");
         }
         catch (FileNotFoundException e) {System.out.println("File not found");}
         catch (IOException i) {System.out.println("Error initializating the data stream");}
