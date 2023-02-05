@@ -2,8 +2,9 @@ import java.io.*;
 import java.util.*;
 
 public class RankingController {
+    // static attribute
     public static Ranking ranking;
-
+    // gives options to return to the main menu or to return to the main method of this class
     private static void returnToMainMenuOrManagement() throws Exception {
         System.out.println("-------------------------------");
         Scanner sc = new Scanner(System.in);
@@ -19,13 +20,14 @@ public class RankingController {
             Main.main(null);
         }
     }
+    //serializes ranking data to file
     public static void save() throws IOException
     {
         System.out.println("Saving changes");
         try {
             FileOutputStream f = new FileOutputStream(new File("ranking.txt"));
             ObjectOutputStream o = new ObjectOutputStream(f);
-            o.writeObject(ranking);
+            o.writeObject(ranking); // writes object to file
             o.close();
             f.close();
             System.out.println("Changes saved to file");
@@ -34,6 +36,7 @@ public class RankingController {
         }
     }
 
+    //deserializes ranking data from file
     public static void load() throws Exception //
     {
         System.out.println("-------------------------------");
@@ -41,7 +44,7 @@ public class RankingController {
         try {
             FileInputStream fi = new FileInputStream("ranking.txt");
             ObjectInputStream oi = new ObjectInputStream(fi);
-            ranking = (Ranking) oi.readObject();
+            ranking = (Ranking) oi.readObject(); // reads object from file
             oi.close();
             fi.close();
             System.out.println("Data Loaded");
@@ -58,75 +61,89 @@ public class RankingController {
     }
 
     public static void addRating() throws Exception {
-        boolean continues = false;
-        load();
-        TutorController.load();
+        boolean continues;
         do {
             System.out.println("-------------------------------");
             System.out.println("Adding a rating to a tutor");
             Scanner sc = new Scanner(System.in);
             System.out.println("Name of tutor rating to add to: ");
             String name = sc.nextLine();
-            System.out.println(name);
-           /* if (TutorController.searchByName(name) == null) {
-                System.out.println("Tutor not found.");
-            } */
-           // else {
+            if (TutorController.searchByName(name) == null) { // if tutor to add rating to is not found
+                System.out.println("Tutor not found, Exiting Rankings.");
+                continues = false; // exits loop
+            }
+            else {
                 double newRating = 0;
-                System.out.print("Rating: ");
-                try {
-                    newRating = Double.parseDouble(sc.nextLine());
-                } catch (Exception e)
-                {
-                    System.out.println("Not a double");
-                }
-                System.out.println(newRating);
                 System.out.println("Which Hashmap to add rating to?");
                 System.out.println("[S] to add to SubjectUnderstandingRatings");
                 System.out.println("[E] to add to ExplanationAbilityRatings");
                 System.out.println("[A] to add to Attitude ratings");
                 System.out.println("[P] to add to progress ratings");
                 char input = sc.next().charAt(0);
-                System.out.println(input);
-                System.out.println(ranking.getSubjectUnderstandingRatings());
-                System.out.println(TutorController.searchByName(name));
-                System.out.println(TutorController.searchByName(name).hashCode());;
-                System.out.println(ranking.getSubjectUnderstandingRatings().get(TutorController.searchByName(name)).hashCode());
-                System.out.println(ranking.getSubjectUnderstandingRatings().get(TutorController.searchByName(name)));
+                System.out.print("Rating: ");
+                sc.nextLine();
+                try { // validation for ensuring data is a double
+                    newRating = Double.parseDouble(sc.nextLine());
+                } catch (Exception e) {
+                    System.out.println("Not a double");
+                }
                 switch (input) {
                     case 'S':
-                       // List<Double> searchedRatingsListByTutorName = ranking.getSubjectUnderstandingRatings().get(TutorController.searchByName(name));
-
-                        ranking.getSubjectUnderstandingRatings().get(TutorController.searchByName(name)).add(newRating);
+                        if (ranking.subjectUnderstandingRatings.get(TutorController.searchByName(name)) == null) { // checking if the LinkedHashMap for that tutor is null
+                            ArrayList<Double> subjectUnderstandingRatings = new ArrayList<>();
+                            subjectUnderstandingRatings.add(newRating);
+                            ranking.subjectUnderstandingRatings.put(TutorController.searchByName(name), subjectUnderstandingRatings); // adds instantiated arraylist with new rating to the LinkedHashMap, mapping the tutor to it
+                        }
+                        else {
+                            ranking.subjectUnderstandingRatings.get(TutorController.searchByName(name)).add(newRating); // adds rating to existing arraylist mapped to the tutor
+                        }
                         break;
                     case 'E':
-                        ranking.getExplanationAbilityRatings().get(TutorController.searchByName(name)).add(newRating);
+                        if (ranking.explanationAbilityRatings.get(TutorController.searchByName(name)) == null) { // checking if the LinkedHashMap for that tutor is null
+                            ArrayList<Double> explanationAbilityRatings = new ArrayList<>();
+                            explanationAbilityRatings.add(newRating);
+                            ranking.explanationAbilityRatings.put(TutorController.searchByName(name), explanationAbilityRatings); // adds instantiated arraylist with new rating to the LinkedHashMap, mapping the tutor to it
+                        }
+                        else {
+                            ranking.explanationAbilityRatings.get(TutorController.searchByName(name)).add(newRating); // adds rating to existing arraylist mapped to the tutor
+                        }
                         break;
                     case 'A':
-                        ranking.getAttitudeAbilityRatings().get(TutorController.searchByName(name)).add(newRating);
+                        if (ranking.attitudeAbilityRatings.get(TutorController.searchByName(name)) == null) { // checking if the LinkedHashMap for that tutor is null
+                            ArrayList<Double> attitudeAbilityRatings = new ArrayList<>();
+                            attitudeAbilityRatings.add(newRating);
+                            ranking.attitudeAbilityRatings.put(TutorController.searchByName(name), attitudeAbilityRatings); // adds instantiated arraylist with new rating to the LinkedHashMap, mapping the tutor to it
+                        }
+                        else {
+                            ranking.attitudeAbilityRatings.get(TutorController.searchByName(name)).add(newRating); // checking if the LinkedHashMap for that tutor is null
+                        }
                         break;
                     case 'P':
-                        ranking.getProgressRatings().get(TutorController.searchByName(name)).add(newRating);
+                        if (ranking.progressRatings.get(TutorController.searchByName(name)) == null) { // checking if the LinkedHashMap for that tutor is null
+                            ArrayList<Double> progressRatings = new ArrayList<>();
+                            progressRatings.add(newRating);
+                            ranking.progressRatings.put(TutorController.searchByName(name), progressRatings); // adds instantiated arraylist with new rating to the LinkedHashMap, mapping the tutor to it
+                        }
+                        else {
+                            ranking.progressRatings.get(TutorController.searchByName(name)).add(newRating); // checking if the LinkedHashMap for that tutor is null
+                        }
                         break;
                     default:
                         System.out.println("Incorrect input, cannot add");
                         break;
                 }
-           // }
-            System.out.println("Want to add a different rating? Press Y");
-            char yesOrNo = sc.next().charAt(0);
-            if (yesOrNo == 'Y') {
-                continues = true;
+                System.out.println("Want to add a different rating? Press Y");
+                char yesOrNo = sc.next().charAt(0);
+                continues = yesOrNo == 'Y'; // sets continues to if (yesOrNo == 'Y')
             }
-        } while (continues);
+        }  while (continues) ;
     }
     public static void main(String[] args) throws Exception {
         System.out.println("-------------------------------");
         System.out.println("Ranking Tutors Management");
-        TutorController.load();
-        load();
-        Scanner sc = new Scanner(System.in);
-        LinkedHashMap<Tutor, ArrayList<Double>> subjectUnderstandingRatings = new LinkedHashMap<>();
+        TutorController.load(); // loads tutors data
+        load(); // loads existing rankings data
+        /*LinkedHashMap<Tutor, ArrayList<Double>> subjectUnderstandingRatings = new LinkedHashMap<>();
         LinkedHashMap<Tutor, ArrayList<Double>> explanationAbilityRatings = new LinkedHashMap<>();
         LinkedHashMap<Tutor, ArrayList<Double>> attitudeAbilityRatings = new LinkedHashMap<>();
         LinkedHashMap<Tutor, ArrayList<Double>> progressRatings = new LinkedHashMap<>();
@@ -375,11 +392,13 @@ public class RankingController {
         progressRatingsList4.add(8, 5.4);
         progressRatingsList4.add(9, 5.7);
         progressRatings.put(TutorController.tutors.get(4), progressRatingsList4);
-        System.out.println(TutorController.tutors.get(4));
-        ranking = new Ranking(subjectUnderstandingRatings, explanationAbilityRatings, attitudeAbilityRatings, progressRatings);
+        ranking = new Ranking(subjectUnderstandingRatings, explanationAbilityRatings, attitudeAbilityRatings, progressRatings); */
         System.out.println("Tutor Rankings");
-        ranking.rank();
-        save();
-        returnToMainMenuOrManagement();
+        ranking.rank(); // prints out tutor rankings
+        addRating(); // calls add rating method to update rankings
+        System.out.println("Updated Tutor Rankings");
+        ranking.rank(); // prints out updated tutor rankings
+        save(); // saves updated data to file
+        returnToMainMenuOrManagement(); // option to return to this main method or to the main menu
     }
 }

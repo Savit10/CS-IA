@@ -7,7 +7,7 @@ public abstract class Person implements Serializable //superclass
     //attributes
     private String id; // unique id to each person
     private String name;
-    public static List<String> idNumbers = new ArrayList<>(); //static arraylist containing the ids of all people in the system
+    public static List<String> idNumbers = new ArrayList<>(); //contains the ids of all people in the system
     private static int lastId; // last ID in the idNumbers list
 
     //constructors
@@ -33,7 +33,7 @@ public abstract class Person implements Serializable //superclass
         if (idNumbers.isEmpty())
         {
             lastId = 0;
-            idNumbers.add(String.format("%04d", 0));
+            idNumbers.add(String.format("%04d", 0)); // id is a string of length 4 with preceding zeroes
         }
         else
         {

@@ -61,11 +61,6 @@ public class NewDate implements Serializable
         }
     }
 
-
-    public NewDate () {
-
-    }
-
     public int getDay()
     {
         return day;

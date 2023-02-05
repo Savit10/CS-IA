@@ -3,11 +3,13 @@ import java.util.ArrayList;
 
 public class Session implements Serializable {
 
+    // attributes
     private NewDate sessionDate;
     private NewTime sessionTime;
-    private ArrayList <Tutor> tutors;
-    private ArrayList <Tutee> tutees;
+    private ArrayList <Tutor> tutors; // list of tutors in the session
+    private ArrayList <Tutee> tutees; // list of tutees in the session
 
+    // constructor
     public Session(NewDate sessionDate, NewTime sessionTime, ArrayList <Tutor> tutors, ArrayList <Tutee> tutees)
     {
         this.sessionDate = sessionDate;
@@ -16,10 +18,7 @@ public class Session implements Serializable {
         this.tutees = tutees;
     }
 
-    public Session() {
-
-    }
-
+    // accessors and mutators
     public NewDate getSessionDate() {
         return sessionDate;
     }
@@ -52,6 +51,7 @@ public class Session implements Serializable {
         this.tutees = tutees;
     }
 
+    // toString - polymorphism
     @java.lang.Override
     public java.lang.String toString() {
         return "Session{" +
@@ -62,6 +62,7 @@ public class Session implements Serializable {
                 '}';
     }
 
+    // compareTo - polymorphism
     public int compareTo(Session session) {
         int comparison = this.getSessionDate().compareTo(session.getSessionDate());
         if (comparison == 0) {

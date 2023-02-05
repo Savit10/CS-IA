@@ -5,21 +5,6 @@ public class NewTime implements Serializable
 {
     private int hours;
     private int minutes;
-
-    public NewTime()
-    {   this.hours = 0;
-        this.minutes = 0;
-    }
-
-    public NewTime(int m)
-    {   this.hours = 0;
-        this.setMinutes(m);
-    }
-
-    public NewTime(int h, int m)
-    {   this.setHours(h);
-        this.setMinutes(m);
-    }
     public NewTime(String time) throws Exception{
         time = time.replace(':', ' ');
         Scanner sc = new Scanner(time);
@@ -29,8 +14,6 @@ public class NewTime implements Serializable
         } catch (Exception e) {
             throw new Exception("Invalid time format");
         }
-
-
     }
 
     public int getHours()
@@ -79,22 +62,6 @@ public class NewTime implements Serializable
         }
         output = output + this.getMinutes();
         return output;
-    }
-
-    public int diff(NewTime another)
-    {   int t1 = this.toMinutes();
-        int t2 = another.toMinutes();
-        int difference = t2 - t1;
-        if( t1 > t2 )
-        {   difference = (t2+24*60) - t1;
-        }
-        return difference;
-    }
-
-    public NewTime add(NewTime another)
-    {   int totalMinutes = this.toMinutes() + another.toMinutes();
-        NewTime result = new NewTime(totalMinutes);
-        return result;
     }
 
     public boolean equals(NewTime another)

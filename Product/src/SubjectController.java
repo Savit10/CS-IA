@@ -3,11 +3,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Scanner;
 
-public class SubjectController implements Serializable{
-
+public class SubjectController{
+    // list of subjects that exist in the system
     public static ArrayList<Subject> subjects = new ArrayList<Subject>();
-
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
+        // loads subject data
+        load();
         System.out.println("-------------------------------");
         System.out.println("Subject Management");
         Scanner sc = new Scanner(System.in);
@@ -22,9 +23,9 @@ public class SubjectController implements Serializable{
         if (userActionInput == 'A')
         {
             try {
-                addSubject();
+                addSubject(); // method to add a subject to the list
             }
-            catch (NumberFormatException ex){
+            catch (NumberFormatException ex){ // catches a number format exception if entered in the method
                 System.out.println("Incorrect input format");
             }
             catch (Exception e) {
@@ -34,20 +35,25 @@ public class SubjectController implements Serializable{
         else if (userActionInput == 'D')
         {
             try {
-                deleteSubject();
+                deleteSubject(); // method to delete a subject from the list
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                throw new RuntimeException(e); // catches any runtime exception that is thrown by deleteSubject()
             }
         }
         else {
             try {
-                editSubject();
+                editSubject(); // method to edit a subject from the list
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                throw new RuntimeException(e); // catches any runtime exception that is thrown by editSubject()
             }
         }
+        // saves subject's data
+        save();
+        // provides option to either go to the main menu of this class or return to the system's main menu
+        returnToMainMenuOrManagement();
     }
 
+    // provides option to either go to the main menu of this class or return to the system's main menu
     private static void returnToMainMenuOrManagement() throws Exception {
         System.out.println("-------------------------------");
         Scanner sc = new Scanner(System.in);
@@ -66,6 +72,7 @@ public class SubjectController implements Serializable{
             Main.main(null);
         }
     }
+    // method to input the subject's name and level
     public static Subject subjectInputs () {
         System.out.println("-------------------------------");
         Scanner sc = new Scanner(System.in);
@@ -77,37 +84,34 @@ public class SubjectController implements Serializable{
             System.out.print("Wrong. Enter one character: H for HL, S for SL? ");
             subjectLevel = sc.next().charAt(0);
         }
+        // returns an instantiated subject based on the inputs
         return new Subject(subjectName, subjectLevel);
     }
+    // adds subject to overall list
     public static void addSubject () throws Exception
     {
-        System.out.println("Adding Subject");
-        load();
-        Subject subject = subjectInputs();
-        subjects.add(subject);
-        save();
-        returnToMainMenuOrManagement();
-
+        System.out.println("-------------------------------");
+        subjects.add(subjectInputs()); // adds subject to overall list
+        System.out.println("Subject Added");
     }
+    // deletes subject from overall list
     public static void deleteSubject() throws Exception {
         System.out.println("-------------------------------");
         System.out.println("Deleting Subject");
-        load();
+        System.out.println(subjects);
         Subject subject = subjectInputs();
-        if (searchSubject(subject)) {
-            subjects.remove(searchSubjectReturnSubject(subject.getSubjectName(),subject.getSubjectLevel()));
+        if (searchSubject(subject)) { // if subject is found
+            subjects.remove(searchSubjectReturnSubject(subject.getSubjectName(),subject.getSubjectLevel())); // remove subject from the list
+            System.out.println("Subject Deleted");
         }
         else {
             System.out.println("Subject not found, cannot be deleted.");
         }
-        save();
-        returnToMainMenuOrManagement();
     }
+    // edits a subject from the overall list
     public static void editSubject() throws Exception {
-        load();
         System.out.println("-------------------------------");
         System.out.println("Editing Subject");
-        System.out.println("subjects list" + subjects.toString());
         Scanner sc = new Scanner(System.in);
         System.out.print("Subject name: ");
         String subjectName = sc.nextLine();
@@ -117,86 +121,50 @@ public class SubjectController implements Serializable{
             System.out.print("Wrong. Enter one character: H for HL, S for SL? ");
             subjectLevel = sc.next().charAt(0);
         }
-        if (searchSubject(subjectName.trim(), subjectLevel)) {
-            Subject newSubject = subjectInputs();
-            if (!searchSubject(newSubject)) {
-                subjects.set(subjects.indexOf(searchSubjectReturnSubject(subjectName.trim(), subjectLevel)), newSubject);
+        Subject subject = new Subject(subjectName, subjectLevel); // instantiates new subject to edit
+        if (searchSubject(subject)) { // if the subject is found in the overall list
+            Subject newSubject = subjectInputs(); // ask for new subject details
+            if (!searchSubject(newSubject)) { // if the new subject is not found
+                subjects.set(subjects.indexOf(searchSubjectReturnSubject(subjectName, subjectLevel)), newSubject); // set the existing subject's position to the new subject inputted
+                System.out.println("Subject Edited");
             }
-            else {
+            else { // new subject is found
                 System.out.println("Subject already exists, cannot edit");
             }
         }
-        else {
+        else { // subject doesn't exist
             System.out.println("Subject not found, cannot edit");
         }
-        System.out.println(subjects);
-        save();
-        returnToMainMenuOrManagement();
     }
-
-    public static boolean searchSubject (String subjectName, char subjectLevel) throws IOException {
-        insertionSort();
-        int low = 0;
-        int high = subjects.size() - 1;
-        while (low <= high) {
-            int mid = (high + low +1) / 2;
-            if (subjects.get(mid).getSubjectName().equals(subjectName) && subjects.get(mid).getSubjectLevel() == (subjectLevel)) {
-                return true;
-            }
-            else if(subjects.get(mid).getSubjectName().compareTo(subjectName) - (subjects.get(mid).getSubjectLevel()-subjectLevel) <0 ) {
-                low = mid + 1;
-            }
-            else {
-                high = mid - 1;
-            }
-        }
-        return false;
-    }
+    // searches the overall list of subjects for a subject, returning true if found and false if not
     public static boolean searchSubject (Subject subject) throws IOException {
-        if (subjects.size() > 2) {
-            insertionSort();
-            int low = 0;
-            int high = subjects.size() - 1;
-            while (low <= high) {
-                int mid = low + (high - low) / 2;
-                if (subjects.get(mid).getSubjectName().equals(subject.getSubjectName()) && subjects.get(mid).getSubjectLevel() == (subject.getSubjectLevel())) {
-                    return true;
-                } else if (subjects.get(mid).getSubjectName().compareTo(subject.getSubjectName()) < 0) {
-                    low = mid + 1;
-                } else {
-                    high = mid - 1;
-                }
-            }
-        }
-        else {
-            for (Subject subjectKey: subjects) {
-                if (subjectKey.getSubjectName().equals(subject.getSubjectName()) && subjectKey.getSubjectLevel() == subject.getSubjectLevel()) {
-                    return true;
-                }
+        insertionSort(); // sorts subjects list according to subject's name and level
+        int low = 0;
+        int high = subjects.size() - 1;
+        while (low <= high) {
+            int mid = (high + low) / 2; // middle of array
+            if (subjects.get(mid).compareTo(subject) == 0) {
+                return true;
+            } else if (subjects.get(mid).compareTo(subject)< 0) { // higher sub-array
+                low = mid + 1;
+            } else { // lower sub-array
+                high = mid - 1;
             }
         }
         return false;
     }
 
+    // searches the list of subject's by name and level, returning the subject if found and null if not
     public static Subject searchSubjectReturnSubject (String subjectName, char subjectLevel) throws IOException {
-        insertionSort();
-        int low = 0;
-        int high = subjects.size() - 1;
-        while (low <= high) {
-            int mid = (high + low + 1) / 2;
-            if (subjects.get(mid).getSubjectName().equals(subjectName) && subjects.get(mid).getSubjectLevel() == (subjectLevel)) {
-                return subjects.get(mid);
-            }
-            else if ((subjects.get(mid).getSubjectName().compareTo(subjectName)) - (subjects.get(mid).getSubjectLevel()-subjectLevel) <0) {
-                low = mid + 1;
-            }
-            else {
-                high = mid - 1;
+        for (Subject subject: subjects) {
+            if (subject.getSubjectName().equals(subjectName) && subject.getSubjectLevel() == (subjectLevel)) {
+                return subject;
             }
         }
         return null;
     }
 
+    // sorts subjects according to their names and levels
     public static ArrayList<Subject> insertionSort()
     {	int c = 0;
         int len = subjects.size();
@@ -215,31 +183,33 @@ public class SubjectController implements Serializable{
         return subjects;
     }
 
+    // saves subjects data to file
     public static void save() throws IOException
     {
         System.out.println("-------------------------------");
-        System.out.println("Saving changes to file");
+        System.out.println("Saving changes to Subjects");
         try {
             FileOutputStream f = new FileOutputStream(new File("subjects.txt"));
             ObjectOutputStream o = new ObjectOutputStream(f);
-            o.writeObject(subjects);
+            o.writeObject(subjects); // writes subjects data to file
             o.close();
             f.close();
             System.out.println("Changes saved to file");
         } catch (IOException e) {
-            System.out.println("Error intializing stream");
+            System.out.println("Error initializing stream");
         }
     }
 
+    // loads subjects data from file
     public static void load() throws Exception
     {
         System.out.println("-------------------------------");
-        System.out.println("Loading data");
+        System.out.println("Loading Subjects data");
         ArrayList<Subject> t = null;
         try {
             FileInputStream fi = new FileInputStream("subjects.txt");
             ObjectInputStream oi = new ObjectInputStream(fi);
-            subjects = (ArrayList<Subject>) oi.readObject();
+            subjects = (ArrayList<Subject>) oi.readObject(); // reads subjects data from file
             oi.close();
             fi.close();
             System.out.println("Data loaded");
@@ -248,7 +218,7 @@ public class SubjectController implements Serializable{
             System.out.println("File not found");
         }
         catch (IOException i) {
-            System.out.println("Error initializating the data stream");
+            System.out.println("Error initializing the data stream");
         }
         catch (ClassNotFoundException c) {
             c.printStackTrace();

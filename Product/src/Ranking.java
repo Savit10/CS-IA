@@ -2,43 +2,13 @@ import java.io.Serializable;
 import java.util.*;
 
 public class Ranking implements Serializable {
-    private LinkedHashMap<Tutor, ArrayList<Double>> subjectUnderstandingRatings; // the tutor's understanding and knowledge of the subject content
-    private LinkedHashMap<Tutor, ArrayList<Double>> explanationAbilityRatings; // the tutor's clarity and ability to explain and simplify concepts
-    private LinkedHashMap<Tutor, ArrayList<Double>> attitudeAbilityRatings; // the tutor's perceived effort and intention in tutoring
-    private LinkedHashMap<Tutor, ArrayList<Double>> progressRatings; // the tutee's progress in the subject as a consequence of taking part in tutoring
+    // attributes
+    public LinkedHashMap<Tutor, ArrayList<Double>> subjectUnderstandingRatings; // the tutor's understanding and knowledge of the subject content
+    public LinkedHashMap<Tutor, ArrayList<Double>> explanationAbilityRatings; // the tutor's clarity and ability to explain and simplify concepts
+    public LinkedHashMap<Tutor, ArrayList<Double>> attitudeAbilityRatings; // the tutor's perceived effort and intention in tutoring
+    public LinkedHashMap<Tutor, ArrayList<Double>> progressRatings; // the tutee's progress in the subject as a consequence of taking part in tutoring
 
-    public LinkedHashMap<Tutor, ArrayList<Double>> getSubjectUnderstandingRatings() {
-        return subjectUnderstandingRatings;
-    }
-
-    public void setSubjectUnderstandingRatings(LinkedHashMap<Tutor, ArrayList<Double>> subjectUnderstandingRatings) {
-        this.subjectUnderstandingRatings = subjectUnderstandingRatings;
-    }
-
-    public LinkedHashMap<Tutor, ArrayList<Double>> getExplanationAbilityRatings() {
-        return explanationAbilityRatings;
-    }
-
-    public void setExplanationAbilityRatings(LinkedHashMap<Tutor, ArrayList<Double>> explanationAbilityRatings) {
-        this.explanationAbilityRatings = explanationAbilityRatings;
-    }
-
-    public LinkedHashMap<Tutor, ArrayList<Double>> getAttitudeAbilityRatings() {
-        return attitudeAbilityRatings;
-    }
-
-    public void setAttitudeAbilityRatings(LinkedHashMap<Tutor, ArrayList<Double>> attitudeAbilityRatings) {
-        this.attitudeAbilityRatings = attitudeAbilityRatings;
-    }
-
-    public LinkedHashMap<Tutor, ArrayList<Double>> getProgressRatings() {
-        return progressRatings;
-    }
-
-    public void setProgressRatings(LinkedHashMap<Tutor, ArrayList<Double>> progressRatings) {
-        this.progressRatings = progressRatings;
-    }
-
+    // constructors
     public Ranking(LinkedHashMap<Tutor, ArrayList<Double>> subjectUnderstandingRatings, LinkedHashMap<Tutor, ArrayList<Double>> explanationAbilityRatings, LinkedHashMap<Tutor, ArrayList<Double>> attitudeAbilityRatings, LinkedHashMap<Tutor, ArrayList<Double>> progressRatings) {
         this.subjectUnderstandingRatings = subjectUnderstandingRatings;
         this.explanationAbilityRatings = explanationAbilityRatings;
@@ -50,12 +20,15 @@ public class Ranking implements Serializable {
 
     }
 
-    private static double movingAverage(double subjectRating, double newRating) { // https://stackoverflow.com/questions/9200874/implementing-exponential-moving-average-in-java
-        double alpha = 0.1, oneMinusAlpha = 0.9; // alpha - indicates the weight of the newest piece of data, with older pieces of data getting multiplied in a geometric sequence with the ratio oneMinusAlpha
+    //methods
+
+    // calculates a moving weighted average of the data, weighting newer data entries higher in the calculation
+    private static double movingAverage(double subjectRating, double newRating) {
+        double alpha = 0.1; // alpha - indicates the weight of the newest piece of data, with older pieces of data getting multiplied with the ratio 1-alpha
         if (subjectRating <= 0) {
             subjectRating = newRating;
         } else {
-            subjectRating = (alpha * newRating) + (oneMinusAlpha * subjectRating);
+            subjectRating = (alpha * newRating) + ((1-alpha) * subjectRating);
         }
         return subjectRating;
     }
@@ -64,17 +37,15 @@ public class Ranking implements Serializable {
     public static LinkedHashMap<Tutor, Double> calculateOverallRating(LinkedHashMap<Tutor, ArrayList<Double>> ratings) {
         LinkedHashMap<Tutor, Double> overallRatings = new LinkedHashMap<>();
         double overallRating = 0;
-        for (Tutor tutor : ratings.keySet()) { // https://www.w3schools.com/java/java_hashmap.asp - iterates through a hashmap's keys
+        for (Tutor tutor : ratings.keySet()) { //iterates through hashmap's keys
             ArrayList<Double> ratingsList = ratings.get(tutor);
             for (Double rating : ratingsList) { //iterates through the arraylist
                 overallRating = movingAverage(overallRating, rating); // calls moving average method for each new piece of data
             }
-            overallRatings.put(tutor, overallRating);
+            overallRatings.put(tutor, overallRating); // adds average to overallRatings
         }
         return overallRatings;
     }
-
-    // brings together the attributes of tutor rankings HashMaps into one HashMap
     public void rank() {
         //calculates the overall rating of the list of doubles and instantiates a new HashMap with key: Tutor, Double: overall attribute rating
         LinkedHashMap<Tutor, Double> overallSubjectUnderstanding = calculateOverallRating(this.subjectUnderstandingRatings);
@@ -87,29 +58,32 @@ public class Ranking implements Serializable {
         listOfMaps.add(overallExplanationAbility);
         listOfMaps.add(overallTutoringAttitude);
         listOfMaps.add(overallTuteeProgress);
-
+        //LinkedHashMap to map all the overall ratings from each category of a tutor in each category to the tutor
         LinkedHashMap<Tutor, ArrayList<Double>> tutorOverallRatings = new LinkedHashMap<>();
+        // list of tutors to map to
         ArrayList<Tutor> tutorArrayList = new ArrayList<>(overallSubjectUnderstanding.keySet());
-
-        for (Tutor tutor: tutorArrayList) {
+        for (Tutor tutor: tutorArrayList) { // iterates through the tutors list
             ArrayList<Double> ratings = new ArrayList<>();
-            for (LinkedHashMap<Tutor, Double> currentHashMap : listOfMaps) {
+            for (LinkedHashMap<Tutor, Double> currentHashMap : listOfMaps) { // iterates through the List of Hashmaps to get the rating of each tutor in one category
                 ratings.add(currentHashMap.get(tutor));
             }
             tutorOverallRatings.put(tutor, ratings);
         }
-
+        //LinkedHashMap mapping tutor to their overall rating
         LinkedHashMap<Tutor, Double> tutorOverallRating = new LinkedHashMap<>();
         double overallTutorRating = 0;
         for (Tutor tutor: tutorOverallRatings.keySet()) {
             overallTutorRating = 0.4*tutorOverallRatings.get(tutor).get(0) + 0.3*tutorOverallRatings.get(tutor).get(1) + 0.2*tutorOverallRatings.get(tutor).get(2) + 0.1*tutorOverallRatings.get(tutor).get(3);
             tutorOverallRating.put(tutor, overallTutorRating);
         }
+        // list of tutors
         ArrayList<Tutor> tutors = new ArrayList<>(tutorOverallRating.keySet());
+        //list of their overall ratings to add to
         ArrayList<Double> doubles = new ArrayList<>();
         for (Tutor tutor: tutors) {
             doubles.add(tutorOverallRating.get(tutor));
         }
+        //parallel sorts tutors with their ratings using insertion sort
         for(int i = 1; i < doubles.size(); i++)
         {
             double temp = doubles.get(i);
@@ -139,6 +113,7 @@ public class Ranking implements Serializable {
         for(int i = 0; i < tutors.size(); i++) {
             tutors.set(i, tutorStack.pop());
         }
+        // printing rankings
         for (int i = 0; i < tutors.size(); i++) {
             System.out.println("Rank " + (i+1) + ": " + tutors.get(i).getName() + ", Tutor Rating: " + doubles.get(i));
         }
